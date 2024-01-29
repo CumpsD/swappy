@@ -450,7 +450,7 @@ namespace SwappyBot.Commands.Slash
             await Context.Channel.SendMessageAsync(
                 $"You are ready to perform a swap from **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**.\n" +
                 $"\n" +
-                $"Deposit: **{quoteDeposit} {assetFrom.Ticker}**\n" +
+                $"Deposit: **{swapState.Amount} {assetFrom.Ticker}**\n" +
                 $"Receive: **{quoteReceive} {assetTo.Ticker}**\n" +
                 // $"Estimated Rate: **{quoteRate}**\n" +
                 // $"Estimated Platform Fee: **${quotePlatformFee}**\n" +
@@ -510,22 +510,22 @@ namespace SwappyBot.Commands.Slash
                 "✅ Chainflip has generated a **Deposit Address** for your swap, please review the following information carefully:\n" +
                 "\n" +
                 "❗❗ **Swap Information** ❗❗\n" +
-                $"* Send **{swapState.QuoteDeposit} {assetFrom.Ticker}** within 1 hour, delays may result in a different rate.\n" +
+                $"* Send **{swapState.Amount} {assetFrom.Ticker}** within 1 hour, delays may result in a different rate.\n" +
                 $"* Funds sent to an expired Deposit Address are **unrecoverable**.\n" +
-                $"* Funds exceeding **{swapState.QuoteDeposit} {assetFrom.Ticker}** are processed at current market rates.\n" +
+                $"* Funds exceeding **{swapState.Amount} {assetFrom.Ticker}** are processed at current market rates.\n" +
                 $"\n" +
                 $"⚠️ Minimum amount: **{assetFrom.MinimumAmount} {assetFrom.Ticker}**\n" +
                 $"⚠️ Maximum amount: **{assetFrom.MaximumAmount} {assetFrom.Ticker}**\n" +
                 $"⚠️ Any funds sent outside of this range will be lost!\n" +
                 $"\n" +
                 $"Swapping **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**\n" +
-                $"Deposit: **{swapState.QuoteDeposit} {assetFrom.Ticker}**\n" +
+                $"Deposit: **{swapState.Amount} {assetFrom.Ticker}**\n" +
                 $"Receive: **{swapState.QuoteReceive} {assetTo.Ticker}**\n" +
                 $"Destination Address: **{swapState.DestinationAddress}**\n" +
                 $"\n" +
                 $"📩 **Deposit Address**: **`{depositAddress}`**\n" +
                 $"\n" +
-                $"⚠️ Send **exactly {swapState.QuoteDeposit} {assetFrom.Ticker}** on the **{assetFrom.Network}** network.\n" +
+                $"⚠️ Send **exactly {swapState.Amount} {assetFrom.Ticker}** on the **{assetFrom.Network}** network.\n" +
                 $"\n" +
                 $"🧐 **Verify** the Deposit Address on [Chainflip's official website]({_configuration.ExplorerUrl}/{depositBlock}-{assetFrom.Network}-{depositChannel})!\n" +
                 $"\n" +
@@ -726,7 +726,10 @@ namespace SwappyBot.Commands.Slash
             // https://chainflip-swap.chainflip.io/quote?amount=1500000000000000000&srcAsset=ETH&destAsset=BTC
             using var client = _httpClientFactory.CreateClient("Quote");
 
-            var convertedAmount = amount * Math.Pow(10, assetFrom.Decimals);
+            var commissionPercent = (double)_configuration.CommissionBps / 100;
+            var commission = amount * (commissionPercent / 100);
+            var ingressAmount = amount - commission;
+            var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
             
             var quote = await client.GetFromJsonAsync<QuoteResponse>(
                 $"quote?amount={convertedAmount}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}");
