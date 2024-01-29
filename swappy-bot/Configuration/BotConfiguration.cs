@@ -63,5 +63,12 @@ namespace SwappyBot.Configuration
         {
             get; init;
         }
+        
+        [Required]
+        [NotNull]
+        public ulong? NotificationChannelId
+        {
+            get; init;
+        }
     }
 }

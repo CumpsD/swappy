@@ -21,7 +21,7 @@ namespace SwappyBot.Commands.Slash
 
     public class Swap : InteractionModuleBase<SocketInteractionContext>
     {
-        private static readonly Dictionary<string, AssetInfo> _supportedAssets = new()
+        private static readonly Dictionary<string, AssetInfo> SupportedAssets = new()
         {
             { "btc", new AssetInfo(
                 "btc", 
@@ -195,7 +195,7 @@ namespace SwappyBot.Commands.Slash
             await DeferAsync();
 
             var data = ((SocketMessageComponent)Context.Interaction).Data.Values.First();
-            var assetFrom = _supportedAssets[data];
+            var assetFrom = SupportedAssets[data];
             
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSelectedAssetSelect(
@@ -227,8 +227,8 @@ namespace SwappyBot.Commands.Slash
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
             var data = ((SocketMessageComponent)Context.Interaction).Data.Values.First();
-            var assetFrom = _supportedAssets[swapState.AssetFrom];
-            var assetTo = _supportedAssets[data];
+            var assetFrom = SupportedAssets[swapState.AssetFrom];
+            var assetTo = SupportedAssets[data];
             
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSelectedAssetSelect(
@@ -281,8 +281,8 @@ namespace SwappyBot.Commands.Slash
             
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
-            var assetFrom = _supportedAssets[swapState.AssetFrom];
-            var assetTo = _supportedAssets[swapState.AssetTo];
+            var assetFrom = SupportedAssets[swapState.AssetFrom];
+            var assetTo = SupportedAssets[swapState.AssetTo];
             
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildAmountButtons(
@@ -354,6 +354,11 @@ namespace SwappyBot.Commands.Slash
             swapState.Amount = amount;
 
             await _dbContext.SaveChangesAsync();
+            
+            await NotifySwap(
+                swapState.Amount.Value,
+                assetFrom, 
+                assetTo);
         }
 
         [ModalInteraction("swap-step4b-*")]
@@ -400,8 +405,8 @@ namespace SwappyBot.Commands.Slash
             
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
-            var assetFrom = _supportedAssets[swapState.AssetFrom];
-            var assetTo = _supportedAssets[swapState.AssetTo];
+            var assetFrom = SupportedAssets[swapState.AssetFrom];
+            var assetTo = SupportedAssets[swapState.AssetTo];
 
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildAddressButton(
@@ -502,8 +507,8 @@ namespace SwappyBot.Commands.Slash
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
        
-            var assetFrom = _supportedAssets[swapState.AssetFrom];
-            var assetTo = _supportedAssets[swapState.AssetTo];
+            var assetFrom = SupportedAssets[swapState.AssetFrom];
+            var assetTo = SupportedAssets[swapState.AssetTo];
             
             swapState.SwapAccepted = DateTimeOffset.UtcNow;
             
@@ -557,6 +562,22 @@ namespace SwappyBot.Commands.Slash
             });
 
             await threadChannel.LeaveAsync();
+
+            await NotifySwap(
+                swapState.Amount.Value,
+                assetFrom, 
+                assetTo);
+        }
+
+        private async Task NotifySwap(
+            double amount,
+            AssetInfo assetFrom, 
+            AssetInfo assetTo)
+        {
+            var notificationChannel = (ITextChannel)Context.Client.GetChannel(_configuration.NotificationChannelId.Value);
+            await notificationChannel.SendMessageAsync(
+                $"I have just started a swap from **{amount} {assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
+                $"Use `/swap` to use my services as well. 😎");
         }
 
         [ComponentInteraction("swap-step6-nok-*")]
@@ -699,12 +720,12 @@ namespace SwappyBot.Commands.Slash
                 .WithMaxValues(1)
                 .WithDisabled(!enabled);
 
-            foreach (var asset in _supportedAssets.Keys)
+            foreach (var asset in SupportedAssets.Keys)
             {
                 if (excludeAsset != null && asset == excludeAsset.Id)
                     continue;
                 
-                var assetInfo = _supportedAssets[asset];
+                var assetInfo = SupportedAssets[asset];
 
                 assetsSelect = assetsSelect
                     .AddOption(
