@@ -148,7 +148,8 @@ namespace SwappyBot.Commands.Slash
                 "Let me start of by mentioning this is a **private thread** and other users **cannot** see this.\n" +
                 "Additionally, I would like to mention this bot is a **community** bot and not an official Chainflip-developed product.\n" +
                 "My source can be reviewed at [GitHub in the `swappy` repository](https://github.com/CumpsD/swappy) to verify all steps.",
-                components: buttons);
+                components: buttons,
+                flags: MessageFlags.SuppressEmbeds);
             
             await ModifyOriginalResponseAsync(x => 
                 x.Content = $"Hi! I've created a new **private thread** with you called **Swap {stateId}** to help you with your swap.");
