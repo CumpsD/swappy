@@ -56,5 +56,12 @@ namespace SwappyBot.Configuration
         {
             get; init;
         }
+        
+        [Required]
+        [NotNull]
+        public int? QuoteValidityInSeconds
+        {
+            get; init;
+        }
     }
 }

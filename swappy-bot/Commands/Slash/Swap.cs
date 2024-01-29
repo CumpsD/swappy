@@ -9,7 +9,6 @@ namespace SwappyBot.Commands.Slash
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using Discord;
-    using Discord.API;
     using Discord.Interactions;
     using Discord.WebSocket;
     using SwappyBot.Configuration;
@@ -328,7 +327,19 @@ namespace SwappyBot.Commands.Slash
                 assetFrom,
                 assetTo);
             
+            var quoteTime = DateTimeOffset.UtcNow;
+            var quoteDeposit = double.Parse(quote.IngressAmount) / Math.Pow(10, assetFrom.Decimals);
             var quoteReceive = double.Parse(quote.EgressAmount) / Math.Pow(10, assetTo.Decimals);
+            var quoteRate = $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
+            // var quotePlatformFee = 0.01;
+            // var quoteChainflipFee = 5.49;
+            
+            swapState.QuoteTime = quoteTime;
+            swapState.QuoteDeposit = quoteDeposit;
+            swapState.QuoteReceive = quoteReceive;
+            swapState.QuoteRate = quoteRate;
+            // swapState.QuotePlatformFee = quotePlatformFee;
+            // swapState.QuoteChainflipFee = quoteChainflipFee;
             
             await Context.Channel.SendMessageAsync(
                 $"You've chosen to swap **{amountText} {assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**.\n" +
@@ -422,28 +433,32 @@ namespace SwappyBot.Commands.Slash
                     components: addressButton);
 
                 return;
-            }            
-            
-            var quote = await GetQuoteAsync(
-                swapState.Amount.Value,
-                assetFrom,
-                assetTo);
-            
-            var quoteTime = DateTimeOffset.UtcNow;
-            var quoteDeposit = double.Parse(quote.IngressAmount) / Math.Pow(10, assetFrom.Decimals);
-            var quoteReceive = double.Parse(quote.EgressAmount) / Math.Pow(10, assetTo.Decimals);
-            var quoteRate = $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
-            // var quotePlatformFee = 0.01;
-            // var quoteChainflipFee = 5.49;
-            
-            swapState.DestinationAddress = address;
+            }
 
-            swapState.QuoteTime = quoteTime;
-            swapState.QuoteDeposit = quoteDeposit;
-            swapState.QuoteReceive = quoteReceive;
-            swapState.QuoteRate = quoteRate;
-            // swapState.QuotePlatformFee = quotePlatformFee;
-            // swapState.QuoteChainflipFee = quoteChainflipFee;
+            if (swapState.QuoteTime.Value.AddSeconds(_configuration.QuoteValidityInSeconds.Value) < DateTimeOffset.UtcNow)
+            {
+                var quote = await GetQuoteAsync(
+                    swapState.Amount.Value,
+                    assetFrom,
+                    assetTo);
+
+                var quoteTime = DateTimeOffset.UtcNow;
+                var quoteDeposit = double.Parse(quote.IngressAmount) / Math.Pow(10, assetFrom.Decimals);
+                var quoteReceive = double.Parse(quote.EgressAmount) / Math.Pow(10, assetTo.Decimals);
+                var quoteRate =
+                    $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
+                // var quotePlatformFee = 0.01;
+                // var quoteChainflipFee = 5.49;
+
+                swapState.DestinationAddress = address;
+
+                swapState.QuoteTime = quoteTime;
+                swapState.QuoteDeposit = quoteDeposit;
+                swapState.QuoteReceive = quoteReceive;
+                swapState.QuoteRate = quoteRate;
+                // swapState.QuotePlatformFee = quotePlatformFee;
+                // swapState.QuoteChainflipFee = quoteChainflipFee;
+            }
 
             var swapButtons = BuildSwapButtons("swap-step6", stateId);
             
@@ -451,13 +466,13 @@ namespace SwappyBot.Commands.Slash
                 $"You are ready to perform a swap from **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**.\n" +
                 $"\n" +
                 $"Deposit: **{swapState.Amount} {assetFrom.Ticker}**\n" +
-                $"Receive: **{quoteReceive} {assetTo.Ticker}**\n" +
+                $"Receive: **{swapState.QuoteReceive} {assetTo.Ticker}**\n" +
                 // $"Estimated Rate: **{quoteRate}**\n" +
                 // $"Estimated Platform Fee: **${quotePlatformFee}**\n" +
                 // $"Estimated Protocol & Gas Fee: **${quoteChainflipFee}**\n" +
                 $"\n" +
                 $"Destination Address: **{swapState.DestinationAddress}**\n" +
-                $"Quote Date: **{quoteTime:yyyy-MM-dd HH:mm:ss}**\n" +
+                $"Quote Date: **{swapState.QuoteTime:yyyy-MM-dd HH:mm:ss}**\n" +
                 $"\n" +
                 $"⚠️ **Review your Destination Address and the amounts carefully!** ⚠️\n" +
                 $"The final amount received may vary due to market conditions and network fees.\n" +
