@@ -40,7 +40,7 @@ namespace SwappyBot.EntityFramework
     }
     #pragma warning restore CS8618
 
-    public class GoodMorningConfiguration : EntityTypeConfiguration<BotContext, SwapState>
+    public class SwapStateConfiguration : EntityTypeConfiguration<BotContext, SwapState>
     {
         private const string TableName = "swap_state";
 
