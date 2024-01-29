@@ -354,11 +354,6 @@ namespace SwappyBot.Commands.Slash
             swapState.Amount = amount;
 
             await _dbContext.SaveChangesAsync();
-            
-            await NotifySwap(
-                swapState.Amount.Value,
-                assetFrom, 
-                assetTo);
         }
 
         [ModalInteraction("swap-step4b-*")]
