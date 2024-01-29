@@ -507,8 +507,6 @@ namespace SwappyBot.Commands.Slash
             
             swapState.SwapAccepted = DateTimeOffset.UtcNow;
             
-            await _dbContext.SaveChangesAsync();
-            
             var deposit = await GetDepositChannelAsync(
                 assetFrom,
                 assetTo,
@@ -519,6 +517,12 @@ namespace SwappyBot.Commands.Slash
             var depositBlock = deposit.IssuedBlock;
             var depositChannel = deposit.ChannelId;
 
+            swapState.DepositAddress = depositAddress;
+            swapState.DepositChannel = $"{depositBlock}-{assetFrom.Network}-{depositChannel}";
+            swapState.DepositGenerated = DateTimeOffset.UtcNow;
+            
+            await _dbContext.SaveChangesAsync();
+            
             typing.Dispose();
 
             await Context.Channel.SendMessageAsync( 
