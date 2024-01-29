@@ -9,7 +9,7 @@ on:
 env:
   DOCKER_REGISTRY: ghcr.io
   BUILD_PREFIX: "8.0"
-  PROJECT_NAME: swappy-bot
+  PROJECT_NAME: swappy
   
 jobs:
   build:
@@ -64,4 +64,4 @@ jobs:
           prerelease: true
           body: |
             ${{ github.event.head_commit.message }}
-            Packages available at https://github.com/CumpsD/swappy-bot/pkgs/container/swappy-bot
+            Packages available at https://github.com/CumpsD/swappy/pkgs/container/swappy

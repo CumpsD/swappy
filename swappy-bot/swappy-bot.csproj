@@ -18,7 +18,7 @@
         <AssemblyFileVersion>$(BuildNumber)</AssemblyFileVersion>
         <InformationalVersion>$(BuildNumber)</InformationalVersion>
         <PackageVersion>$(BuildNumber)</PackageVersion>
-        <RepositoryUrl>https://github.com/cumpsd/swappy-bot</RepositoryUrl>
+        <RepositoryUrl>https://github.com/cumpsd/swappy</RepositoryUrl>
         
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
