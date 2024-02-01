@@ -218,7 +218,7 @@ namespace SwappyBot.Commands.Swap
         public async Task SwapStep2(
             string stateId)
         {
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             var data = ((SocketMessageComponent)Context.Interaction).Data.Values.First();
             var assetFrom = SupportedAssets[data];
@@ -257,7 +257,7 @@ namespace SwappyBot.Commands.Swap
         public async Task SwapStep3(
             string stateId)
         {
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
@@ -326,7 +326,7 @@ namespace SwappyBot.Commands.Swap
                 return;
             }
 
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
@@ -495,7 +495,7 @@ namespace SwappyBot.Commands.Swap
             var data = ((SocketModal)Context.Interaction).Data;
             var address = data.Components.First().Value;
 
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             _logger.LogInformation(
                 "[{StateId}] Received {DestinationAddress} as destination address",
@@ -630,7 +630,7 @@ namespace SwappyBot.Commands.Swap
         public async Task SwapStep6Approve(
             string stateId)
         {
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             _logger.LogInformation(
                 "[{StateId}] Generating a deposit address",
@@ -757,7 +757,7 @@ namespace SwappyBot.Commands.Swap
         public async Task SwapStep6Cancel(
             string stateId)
         {
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             _logger.LogInformation(
                 "[{StateId}] Decided to cancel the swap offer",
