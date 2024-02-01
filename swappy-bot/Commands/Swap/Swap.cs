@@ -33,6 +33,7 @@ namespace SwappyBot.Commands.Swap
                     0.0007,
                     0.65,
                     [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
+                    $"0.00{new string('#', 6)}",
                     x => AddressValidator.IsValidAddress(x, "btc"))
             },
 
@@ -47,6 +48,7 @@ namespace SwappyBot.Commands.Swap
                     4,
                     4_100,
                     [10, 20, 50, 150, 300, 700, 1000, 2000, 4000],
+                    $"0.00{new string('#', 8)}",
                     x => true)
             },
 
@@ -61,6 +63,7 @@ namespace SwappyBot.Commands.Swap
                     0.01,
                     11,
                     [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10],
+                    $"0.00{new string('#', 16)}",
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -78,6 +81,7 @@ namespace SwappyBot.Commands.Swap
                     4,
                     5_700,
                     [10, 20, 50, 150, 300, 1000, 2000, 4000, 5500],
+                    $"0.00{new string('#', 16)}",
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -95,6 +99,7 @@ namespace SwappyBot.Commands.Swap
                     20,
                     25_000,
                     [25, 50, 100, 500, 1000, 2500, 5000, 10000, 20000],
+                    $"0.00{new string('#', 4)}",
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -726,6 +731,7 @@ namespace SwappyBot.Commands.Swap
 
             await NotifySwap(
                 swapState.Amount.Value,
+                swapState.QuoteReceive.Value,
                 assetFrom,
                 assetTo);
 
@@ -741,7 +747,8 @@ namespace SwappyBot.Commands.Swap
         }
 
         private async Task NotifySwap(
-            double amount,
+            double amountFrom,
+            double amountTo,
             AssetInfo assetFrom,
             AssetInfo assetTo)
         {
@@ -749,7 +756,7 @@ namespace SwappyBot.Commands.Swap
                 (ITextChannel)Context.Client.GetChannel(_configuration.NotificationChannelId.Value);
             
             await notificationChannel.SendMessageAsync(
-                $"I have just started a swap from **{amount} {assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
+                $"I have just started a swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
                 $"Use `/swap` to use my services as well. 😎");
         }
 

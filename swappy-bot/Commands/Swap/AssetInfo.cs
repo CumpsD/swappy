@@ -11,5 +11,6 @@ namespace SwappyBot.Commands.Swap
         double MinimumAmount, 
         double MaximumAmount,
         double[] SuggestedAmounts,
+        string FormatString,
         Func<string, bool> AddressValidator);
 }
