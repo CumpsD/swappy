@@ -6,7 +6,6 @@ namespace SwappyBot.Commands.Swap
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Json;
-    using System.Text.Json;
     using System.Threading.Tasks;
     using Discord;
     using Discord.Interactions;
@@ -34,7 +33,6 @@ namespace SwappyBot.Commands.Swap
                     0.0007,
                     0.65,
                     [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
-                    new string('0', 8),
                     x => AddressValidator.IsValidAddress(x, "btc"))
             },
 
@@ -49,7 +47,6 @@ namespace SwappyBot.Commands.Swap
                     4,
                     4_100,
                     [10, 20, 50, 150, 300, 700, 1000, 2000, 4000],
-                    new string('0', 10),
                     x => true)
             },
 
@@ -64,7 +61,6 @@ namespace SwappyBot.Commands.Swap
                     0.01,
                     11,
                     [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10],
-                    new string('0', 18),
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -82,7 +78,6 @@ namespace SwappyBot.Commands.Swap
                     4,
                     5_700,
                     [10, 20, 50, 150, 300, 1000, 2000, 4000, 5500],
-                    new string('0', 18),
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -100,7 +95,6 @@ namespace SwappyBot.Commands.Swap
                     20,
                     25_000,
                     [25, 50, 100, 500, 1000, 2500, 5000, 10000, 20000],
-                    new string('0', 6),
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -177,7 +171,8 @@ namespace SwappyBot.Commands.Swap
                 "Let me start of by mentioning this is a **private thread** and other users **cannot** see this.\n" +
                 "Additionally, I would like to mention this bot is a **community** bot and not an official Chainflip-developed product.\n" +
                 "My source can be reviewed at [GitHub in the `swappy` repository](https://github.com/CumpsD/swappy) to verify all steps.\n" +
-                "You can get in touch with my developers on [Discord](https://discord.gg/wwzZ7a7aQn) in case you have questions.",
+                "You can get in touch with my developers on [Discord](https://discord.gg/wwzZ7a7aQn) in case you have questions." +
+                $"If you reach out for support, be sure to mention reference **{stateId}** to make it easier to help you.",
                 components: buttons,
                 flags: MessageFlags.SuppressEmbeds);
 
@@ -190,7 +185,7 @@ namespace SwappyBot.Commands.Swap
         public async Task SwapStep1(
             string stateId)
         {
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildIntroButtons(stateId, false));
@@ -418,6 +413,21 @@ namespace SwappyBot.Commands.Swap
                 assetFrom,
                 assetTo);
 
+            if (quote == null)
+            {
+                // Send support message, and allow a retry
+                var amountButtons = BuildAmountButtons(
+                    $"swap-step4-{stateId}-for",
+                    assetFrom);
+                
+                await Context.Channel.SendMessageAsync(
+                    "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.",
+                    components: amountButtons,
+                    flags: MessageFlags.SuppressEmbeds);
+                
+                return;
+            }
+            
             var quoteTime = DateTimeOffset.UtcNow;
             var quoteDeposit = double.Parse(quote.IngressAmount) / Math.Pow(10, assetFrom.Decimals);
             var quoteReceive = double.Parse(quote.EgressAmount) / Math.Pow(10, assetTo.Decimals);
@@ -572,6 +582,20 @@ namespace SwappyBot.Commands.Swap
                     swapState.Amount.Value,
                     assetFrom,
                     assetTo);
+
+                if (quote == null)
+                {
+                    var addressButton = BuildAddressButton(
+                        $"swap-step5-{stateId}",
+                        assetTo);
+                    
+                    await Context.Channel.SendMessageAsync(
+                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.",
+                        components: addressButton,
+                        flags: MessageFlags.SuppressEmbeds);
+
+                    return;
+                }
 
                 var quoteTime = DateTimeOffset.UtcNow;
                 var quoteDeposit = double.Parse(quote.IngressAmount) / Math.Pow(10, assetFrom.Decimals);
@@ -952,7 +976,7 @@ namespace SwappyBot.Commands.Swap
             var ingressAmount = amount - commission;
             var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
 
-            var quoteRequest = $"quote?amount={convertedAmount.ToString(assetFrom.FormatString)}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}";
+            var quoteRequest = $"quote?amount={convertedAmount:0}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}";
             var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)
@@ -968,7 +992,7 @@ namespace SwappyBot.Commands.Swap
                 await quoteResponse.Content.ReadAsStringAsync(),
                 quoteRequest);
 
-            throw new Exception("Quote API returned an error.");
+            return null;
         }
 
         private async Task<DepositAddressResult?> GetDepositChannelAsync(
