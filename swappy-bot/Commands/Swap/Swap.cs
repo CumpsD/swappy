@@ -942,8 +942,8 @@ namespace SwappyBot.Commands.Swap
             var ingressAmount = amount - commission;
             var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
 
-            var quoteResponse = await client.GetAsync(
-                $"quote?amount={convertedAmount}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}");
+            var quoteRequest = $"quote?amount={convertedAmount}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}";
+            var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)
             {
@@ -953,9 +953,10 @@ namespace SwappyBot.Commands.Swap
             }
             
             _logger.LogError(
-                "Quote API returned {StatusCode}: {Error}",
+                "Quote API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
                 quoteResponse.StatusCode,
-                await quoteResponse.Content.ReadAsStringAsync());
+                await quoteResponse.Content.ReadAsStringAsync(),
+                quoteRequest);
 
             throw new Exception("Quote API returned an error.");
         }
