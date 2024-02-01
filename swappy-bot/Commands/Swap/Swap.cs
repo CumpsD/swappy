@@ -150,10 +150,9 @@ namespace SwappyBot.Commands.Swap
             await thread.AddUserAsync((IGuildUser)Context.User);
 
             _logger.LogInformation(
-                "[{StateId}] Created thread {Thread} with {User}",
+                "[{StateId}] Created thread {Thread}",
                 stateId,
-                threadName,
-                Context.User.Username);
+                threadName);
 
             // await thread.SendMessageAsync(
             //     "Hi! It looks like you want to make a swap. I can help you with that.\n" +
@@ -202,19 +201,14 @@ namespace SwappyBot.Commands.Swap
                 components: assetFrom);
 
             _logger.LogInformation(
-                "[{StateId}] Proposed source assets to {User}",
-                stateId,
-                Context.User.Username);
+                "[{StateId}] Proposed source assets",
+                stateId);
 
             await _dbContext.SwapState.AddAsync(
                 new SwapState
                 {
                     StateId = stateId,
-                    SwapStarted = DateTimeOffset.UtcNow,
-                    ServerId = Context.Guild.Id,
-                    ServerName = Context.Guild.Name,
-                    UserId = Context.User.Id,
-                    UserName = Context.User.Username
+                    SwapStarted = DateTimeOffset.UtcNow
                 });
 
             await _dbContext.SaveChangesAsync();
@@ -230,9 +224,8 @@ namespace SwappyBot.Commands.Swap
             var assetFrom = SupportedAssets[data];
 
             _logger.LogInformation(
-                "[{StateId}] {User} chose {SourceAsset} as source asset",
+                "[{StateId}] Chose {SourceAsset} as source asset",
                 stateId,
-                Context.User.Username,
                 assetFrom.Ticker);
 
             await ModifyOriginalResponseAsync(x =>
@@ -250,9 +243,8 @@ namespace SwappyBot.Commands.Swap
                 components: assetTo);
 
             _logger.LogInformation(
-                "[{StateId}] Proposed destination assets to {User}",
-                stateId,
-                Context.User.Username);
+                "[{StateId}] Proposed destination assets",
+                stateId);
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
@@ -274,9 +266,8 @@ namespace SwappyBot.Commands.Swap
             var assetTo = SupportedAssets[data];
 
             _logger.LogInformation(
-                "[{StateId}] {User} chose {DestinationAsset} as destination asset",
+                "[{StateId}] Chose {DestinationAsset} as destination asset",
                 stateId,
-                Context.User.Username,
                 assetTo.Ticker);
 
             await ModifyOriginalResponseAsync(x =>
@@ -299,9 +290,8 @@ namespace SwappyBot.Commands.Swap
                 components: amount);
 
             _logger.LogInformation(
-                "[{StateId}] Asked {User} for the amount of {SourceAsset} they wish to swap",
+                "[{StateId}] Asked for the amount of {SourceAsset} to swap",
                 stateId,
-                Context.User.Username,
                 assetFrom.Ticker);
 
             swapState.AssetTo = assetTo.Id;
@@ -329,9 +319,8 @@ namespace SwappyBot.Commands.Swap
                     .Build();
 
                 _logger.LogInformation(
-                    "[{StateId}] {User} wants to provide a custom amount",
-                    stateId,
-                    Context.User.Username);
+                    "[{StateId}] Custom amount chosen",
+                    stateId);
 
                 await Context.Interaction.RespondWithModalAsync(modal);
                 return;
@@ -345,9 +334,8 @@ namespace SwappyBot.Commands.Swap
             var assetTo = SupportedAssets[swapState.AssetTo];
 
             _logger.LogInformation(
-                "[{StateId}] {User} provided {Amount} as amount",
+                "[{StateId}] Provided {Amount} as amount",
                 stateId,
-                Context.User.Username,
                 amountText);
 
             await ModifyOriginalResponseAsync(x =>
@@ -368,9 +356,8 @@ namespace SwappyBot.Commands.Swap
                     components: amountButtons);
 
                 _logger.LogInformation(
-                    "[{StateId}] {User} their amount ({Amount}) is not a number",
+                    "[{StateId}] Amount ({Amount}) is not a number",
                     stateId,
-                    Context.User.Username,
                     amountText);
 
                 return;
@@ -388,9 +375,8 @@ namespace SwappyBot.Commands.Swap
                     components: amountButtons);
 
                 _logger.LogInformation(
-                    "[{StateId}] {User} their amount ({Amount}) is outside of the restrictions",
+                    "[{StateId}] Amount ({Amount}) is outside of the restrictions",
                     stateId,
-                    Context.User.Username,
                     amountText);
 
                 return;
@@ -401,9 +387,8 @@ namespace SwappyBot.Commands.Swap
                 assetTo);
 
             _logger.LogInformation(
-                "[{StateId}] Getting quote for {User} from {Amount} {SourceAsset} to {DestinationAsset}",
+                "[{StateId}] Getting quote from {Amount} {SourceAsset} to {DestinationAsset}",
                 stateId,
-                Context.User.Username,
                 amount,
                 assetFrom.Ticker,
                 assetTo.Ticker);
@@ -454,9 +439,8 @@ namespace SwappyBot.Commands.Swap
                 components: address);
 
             _logger.LogInformation(
-                "[{StateId}] Offered quote to {User} from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset}, asking for a destination address now",
+                "[{StateId}] Offered quote from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset}, asking for a destination address now",
                 stateId,
-                Context.User.Username,
                 amount,
                 assetFrom.Ticker,
                 quoteReceive,
@@ -499,9 +483,8 @@ namespace SwappyBot.Commands.Swap
             await Context.Interaction.RespondWithModalAsync(modal);
 
             _logger.LogInformation(
-                "[{StateId}] Asked {User} for a destination address",
-                stateId,
-                Context.User.Username);
+                "[{StateId}] Asked for a destination address",
+                stateId);
         }
 
         [ModalInteraction("swap-step5b-*")]
@@ -515,10 +498,9 @@ namespace SwappyBot.Commands.Swap
             await DeferAsync();
 
             _logger.LogInformation(
-                "[{StateId}] Received {DestinationAddress} from {User} as destination address",
+                "[{StateId}] Received {DestinationAddress} as destination address",
                 stateId,
-                address,
-                Context.User.Username);
+                address);
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
@@ -542,9 +524,8 @@ namespace SwappyBot.Commands.Swap
                     components: addressButton);
 
                 _logger.LogInformation(
-                    "[{StateId}] {User} provided an empty destination address",
-                    stateId,
-                    Context.User.Username);
+                    "[{StateId}] Provided an empty destination address",
+                    stateId);
 
                 return;
             }
@@ -560,9 +541,8 @@ namespace SwappyBot.Commands.Swap
                     components: addressButton);
 
                 _logger.LogInformation(
-                    "[{StateId}] {User} provided an invalid destination address",
-                    stateId,
-                    Context.User.Username);
+                    "[{StateId}] Provided an invalid destination address",
+                    stateId);
 
                 return;
             }
@@ -571,9 +551,8 @@ namespace SwappyBot.Commands.Swap
                 DateTimeOffset.UtcNow)
             {
                 _logger.LogInformation(
-                    "[{StateId}] Quote for {User} from {Amount} {SourceAsset} to {DestinationAsset} expired, asking a new one",
+                    "[{StateId}] Quote from {Amount} {SourceAsset} to {DestinationAsset} expired, asking a new one",
                     stateId,
-                    Context.User.Username,
                     swapState.Amount.Value,
                     assetFrom.Ticker,
                     assetTo.Ticker);
@@ -636,9 +615,8 @@ namespace SwappyBot.Commands.Swap
                 components: swapButtons);
 
             _logger.LogInformation(
-                "[{StateId}] Offered quote to {User} from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress}, now we just need confirmation",
+                "[{StateId}] Offered quote from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress}, now we just need confirmation",
                 stateId,
-                Context.User.Username,
                 swapState.Amount,
                 assetFrom.Ticker,
                 swapState.QuoteReceive,
@@ -655,9 +633,8 @@ namespace SwappyBot.Commands.Swap
             await DeferAsync();
 
             _logger.LogInformation(
-                "[{StateId}] Generating a deposit address for {User}",
-                stateId,
-                Context.User.Username);
+                "[{StateId}] Generating a deposit address",
+                stateId);
 
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
@@ -688,10 +665,9 @@ namespace SwappyBot.Commands.Swap
             var depositChannel = deposit.ChannelId;
 
             _logger.LogInformation(
-                "[{StateId}] Generated deposit address {DepositAddress} for {User}",
+                "[{StateId}] Generated deposit address {DepositAddress}",
                 stateId,
-                deposit.Address,
-                Context.User.Username);
+                deposit.Address);
 
             swapState.DepositAddress = depositAddress;
             swapState.DepositChannel = $"{depositBlock}-{assetFrom.Network}-{depositChannel}";
@@ -729,9 +705,8 @@ namespace SwappyBot.Commands.Swap
                 $"🙏 Thank you for using **swappy!** Feel free to type `/swap` in the main channel and come back any time! 😎");
 
             _logger.LogInformation(
-                "[{StateId}] Provided {User} with the deposit instructions to {DepositAddress} -> {ChainflipLink}",
+                "[{StateId}] Provided the deposit instructions to {DepositAddress} -> {ChainflipLink}",
                 stateId,
-                Context.User.Username,
                 depositAddress,
                 $"{_configuration.ExplorerUrl}/{depositBlock}-{assetFrom.Network}-{depositChannel}");
 
@@ -746,9 +721,8 @@ namespace SwappyBot.Commands.Swap
             await threadChannel.LeaveAsync();
 
             _logger.LogInformation(
-                "[{StateId}] Locked thread with {User}",
-                stateId,
-                Context.User.Username);
+                "[{StateId}] Locked thread",
+                stateId);
 
             await NotifySwap(
                 swapState.Amount.Value,
@@ -756,15 +730,14 @@ namespace SwappyBot.Commands.Swap
                 assetTo);
 
             _logger.LogInformation(
-                "[{StateId}] Announced new swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress} for {User}",
+                "[{StateId}] Announced new swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress}",
                 stateId,
                 swapState.Amount,
                 assetFrom.Ticker,
                 swapState.QuoteReceive,
                 assetTo.Ticker,
                 swapState.DestinationAddress,
-                depositAddress,
-                Context.User.Username);
+                depositAddress);
         }
 
         private async Task NotifySwap(
@@ -774,6 +747,7 @@ namespace SwappyBot.Commands.Swap
         {
             var notificationChannel =
                 (ITextChannel)Context.Client.GetChannel(_configuration.NotificationChannelId.Value);
+            
             await notificationChannel.SendMessageAsync(
                 $"I have just started a swap from **{amount} {assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
                 $"Use `/swap` to use my services as well. 😎");
@@ -786,9 +760,8 @@ namespace SwappyBot.Commands.Swap
             await DeferAsync();
 
             _logger.LogInformation(
-                "[{StateId}] {User} decided to cancel the swap offer",
-                stateId,
-                Context.User.Username);
+                "[{StateId}] Decided to cancel the swap offer",
+                stateId);
 
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
@@ -810,9 +783,8 @@ namespace SwappyBot.Commands.Swap
             await threadChannel.LeaveAsync();
 
             _logger.LogInformation(
-                "[{StateId}] Locked thread with {User}",
-                stateId,
-                Context.User.Username);
+                "[{StateId}] Locked thread",
+                stateId);
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 

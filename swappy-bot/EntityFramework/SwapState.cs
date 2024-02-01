@@ -11,12 +11,6 @@ namespace SwappyBot.EntityFramework
         
         public DateTimeOffset SwapStarted { get; set; }
         
-        public ulong ServerId { get; set; }
-        public string? ServerName { get; set; } 
-        
-        public ulong UserId { get; set; }
-        public string? UserName { get; set; }
-        
         public string? AssetFrom { get; set;  }
         public string? AssetTo { get; set;  }
         public double? Amount { get; set;  }
@@ -55,16 +49,6 @@ namespace SwappyBot.EntityFramework
             builder.Property(x => x.SwapStarted).IsRequired();
             builder.HasIndex(x => x.SwapStarted);
             
-            builder.Property(x => x.ServerId).IsRequired();
-            builder.HasIndex(x => x.ServerId);
-
-            builder.Property(x => x.ServerName).IsRequired(false).HasMaxLength(150);
-            
-            builder.Property(x => x.UserId).IsRequired();
-            builder.HasIndex(x => x.UserId);
-            
-            builder.Property(x => x.UserName).IsRequired(false).HasMaxLength(40);
-
             builder.Property(x => x.AssetFrom).IsRequired(false).HasMaxLength(5);
             builder.Property(x => x.AssetTo).IsRequired(false).HasMaxLength(5);
             builder.Property(x => x.Amount).IsRequired(false);
@@ -90,7 +74,6 @@ namespace SwappyBot.EntityFramework
             
             builder.Property(x => x.DepositAddress).IsRequired(false).HasMaxLength(100);
             builder.Property(x => x.DepositChannel).IsRequired(false).HasMaxLength(50);
-
         }
     }
 }
