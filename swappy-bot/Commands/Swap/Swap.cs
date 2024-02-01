@@ -34,6 +34,7 @@ namespace SwappyBot.Commands.Swap
                     0.0007,
                     0.65,
                     [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
+                    new string('0', 8),
                     x => AddressValidator.IsValidAddress(x, "btc"))
             },
 
@@ -48,6 +49,7 @@ namespace SwappyBot.Commands.Swap
                     4,
                     4_100,
                     [10, 20, 50, 150, 300, 700, 1000, 2000, 4000],
+                    new string('0', 10),
                     x => true)
             },
 
@@ -62,6 +64,7 @@ namespace SwappyBot.Commands.Swap
                     0.01,
                     11,
                     [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10],
+                    new string('0', 18),
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -79,6 +82,7 @@ namespace SwappyBot.Commands.Swap
                     4,
                     5_700,
                     [10, 20, 50, 150, 300, 1000, 2000, 4000, 5500],
+                    new string('0', 18),
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -96,6 +100,7 @@ namespace SwappyBot.Commands.Swap
                     20,
                     25_000,
                     [25, 50, 100, 500, 1000, 2500, 5000, 10000, 20000],
+                    new string('0', 6),
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -947,7 +952,7 @@ namespace SwappyBot.Commands.Swap
             var ingressAmount = amount - commission;
             var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
 
-            var quoteRequest = $"quote?amount={convertedAmount.ToRoundTrip()}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}";
+            var quoteRequest = $"quote?amount={convertedAmount.ToString(assetFrom.FormatString)}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}";
             var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)
