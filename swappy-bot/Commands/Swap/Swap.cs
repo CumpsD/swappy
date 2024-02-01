@@ -1,4 +1,4 @@
-namespace SwappyBot.Commands.Slash
+namespace SwappyBot.Commands.Swap
 {
     using System;
     using System.Collections.Generic;
@@ -6,15 +6,14 @@ namespace SwappyBot.Commands.Slash
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Json;
-    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using Discord;
     using Discord.Interactions;
     using Discord.WebSocket;
-    using SwappyBot.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nethereum.Util;
+    using SwappyBot.Configuration;
     using SwappyBot.EntityFramework;
     using SwappyBot.Infrastructure;
     using Emoji = Discord.Emoji;
@@ -23,69 +22,84 @@ namespace SwappyBot.Commands.Slash
     {
         private static readonly Dictionary<string, AssetInfo> SupportedAssets = new()
         {
-            { "btc", new AssetInfo(
-                "btc", 
-                "BTC", 
-                "Bitcoin", 
-                "Bitcoin", 
-                8,
-                0.0007,
-                0.65, 
-                [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
-                x => AddressValidator.IsValidAddress(x, "btc")) },
-            
-            { "dot", new AssetInfo(
-                "dot", 
-                "DOT", 
-                "Polkadot", 
-                "Polkadot", 
-                10,
-                4,
-                4_100, 
-                [10, 20, 50, 150, 300, 700, 1000, 2000, 4000],
-                x => true) },
-            
-            { "eth", new AssetInfo(
-                "eth", 
-                "ETH", 
-                "Ethereum",
-                "Ethereum",
-                18,
-                0.01,
-                11,
-                [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10],
-                x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
-                     AddressUtil.Current.IsValidAddressLength(x) &&
-                     AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                     (AddressUtil.Current.IsChecksumAddress(x) ||  x == x.ToLower() || x[2..] == x[2..].ToUpper())) },
-            
-            { "flip", new AssetInfo(
+            {
+                "btc",
+                new AssetInfo(
+                    "btc",
+                    "BTC",
+                    "Bitcoin",
+                    "Bitcoin",
+                    8,
+                    0.0007,
+                    0.65,
+                    [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
+                    x => AddressValidator.IsValidAddress(x, "btc"))
+            },
+
+            {
+                "dot",
+                new AssetInfo(
+                    "dot",
+                    "DOT",
+                    "Polkadot",
+                    "Polkadot",
+                    10,
+                    4,
+                    4_100,
+                    [10, 20, 50, 150, 300, 700, 1000, 2000, 4000],
+                    x => true)
+            },
+
+            {
+                "eth",
+                new AssetInfo(
+                    "eth",
+                    "ETH",
+                    "Ethereum",
+                    "Ethereum",
+                    18,
+                    0.01,
+                    11,
+                    [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10],
+                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
+                         AddressUtil.Current.IsValidAddressLength(x) &&
+                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
+            },
+
+            {
                 "flip",
-                "FLIP",
-                "Chainflip",
-                "Ethereum",
-                18,
-                4,
-                5_700, 
-                [10, 20, 50, 150, 300, 1000, 2000, 4000, 5500],
-                x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
-                     AddressUtil.Current.IsValidAddressLength(x) &&
-                     AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                     (AddressUtil.Current.IsChecksumAddress(x) ||  x == x.ToLower() || x[2..] == x[2..].ToUpper())) },
-            
-            { "usdc", new AssetInfo(
-                "usdc", 
-                "USDC", 
-                "ethUSDC",
-                "Ethereum",
-                6,
-                20,
-                25_000,
-                [25, 50, 100, 500, 1000, 2500, 5000, 10000, 20000],
-                x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
-                     AddressUtil.Current.IsValidAddressLength(x) &&
-                     AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                     (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper())) },
+                new AssetInfo(
+                    "flip",
+                    "FLIP",
+                    "Chainflip",
+                    "Ethereum",
+                    18,
+                    4,
+                    5_700,
+                    [10, 20, 50, 150, 300, 1000, 2000, 4000, 5500],
+                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
+                         AddressUtil.Current.IsValidAddressLength(x) &&
+                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
+            },
+
+            {
+                "usdc",
+                new AssetInfo(
+                    "usdc",
+                    "USDC",
+                    "ethUSDC",
+                    "Ethereum",
+                    6,
+                    20,
+                    25_000,
+                    [25, 50, 100, 500, 1000, 2500, 5000, 10000, 20000],
+                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
+                         AddressUtil.Current.IsValidAddressLength(x) &&
+                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
+            },
         };
         
         private readonly ILogger _logger;
@@ -109,20 +123,23 @@ namespace SwappyBot.Commands.Slash
         [SlashCommand(SlashCommands.Swap, "Perform a swap. This will create a new private thread to help you make a swap.")]
         public async Task Execute()
         {
-            _logger.LogInformation(
-                "Command /{Command}, User: {User}",
-                SlashCommands.Swap,
-                Context.User.Username);
-
             await DeferAsync(ephemeral: true);
             
             var stateId = $"0x{Guid.NewGuid():N}";
+            
+            _logger.LogInformation(
+                "[{StateId}] Command /{Command}, Server: {Server}, User: {User}",
+                stateId,
+                SlashCommands.Swap,
+                Context.Guild.Name,
+                Context.User.Username);
 
             var buttons = BuildIntroButtons(stateId);
 
             var channel = (ITextChannel)Context.Channel;
+            var threadName = $"Swap {stateId}";
             var thread = await channel.CreateThreadAsync(
-                $"Swap {stateId}",
+                threadName,
                 ThreadType.PrivateThread,
                 ThreadArchiveDuration.OneWeek,
                 invitable: false);
@@ -131,6 +148,12 @@ namespace SwappyBot.Commands.Slash
 
             await thread.AddUserAsync((IGuildUser)Context.User);
 
+            _logger.LogInformation(
+                "[{StateId}] Created thread {Thread} with {User}",
+                stateId,
+                threadName,
+                Context.User.Username);
+            
             // await thread.SendMessageAsync(
             //     "Hi! It looks like you want to make a swap. I can help you with that.\n" +
             //     "Let me start of by mentioning this is a **private thread** and other users **cannot** see this.\n" +
@@ -146,7 +169,8 @@ namespace SwappyBot.Commands.Slash
                 "Hi! It looks like you want to make a swap. I can help you with that.\n" +
                 "Let me start of by mentioning this is a **private thread** and other users **cannot** see this.\n" +
                 "Additionally, I would like to mention this bot is a **community** bot and not an official Chainflip-developed product.\n" +
-                "My source can be reviewed at [GitHub in the `swappy` repository](https://github.com/CumpsD/swappy) to verify all steps.",
+                "My source can be reviewed at [GitHub in the `swappy` repository](https://github.com/CumpsD/swappy) to verify all steps.\n" +
+                "You can get in touch with my developers on [Discord](https://discord.gg/wwzZ7a7aQn) in case you have questions.",
                 components: buttons,
                 flags: MessageFlags.SuppressEmbeds);
             
@@ -174,6 +198,11 @@ namespace SwappyBot.Commands.Slash
                 "First of all, select the asset you want to swap **from**:", 
                 components: assetFrom);
             
+            _logger.LogInformation(
+                "[{StateId}] Proposed source assets to {User}",
+                stateId,
+                Context.User.Username);
+            
             await _dbContext.SwapState.AddAsync(
                 new SwapState
                 {
@@ -197,6 +226,12 @@ namespace SwappyBot.Commands.Slash
             var data = ((SocketMessageComponent)Context.Interaction).Data.Values.First();
             var assetFrom = SupportedAssets[data];
             
+            _logger.LogInformation(
+                "[{StateId}] {User} chose {SourceAsset} as source asset",
+                stateId,
+                Context.User.Username,
+                assetFrom.Ticker);
+            
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSelectedAssetSelect(
                     $"swap-step2-{stateId}",
@@ -211,6 +246,11 @@ namespace SwappyBot.Commands.Slash
                 $"You've chosen to send **{assetFrom.Name} ({assetFrom.Ticker})**. Now select the asset you want to swap **to**:", 
                 components: assetTo);
 
+            _logger.LogInformation(
+                "[{StateId}] Proposed destination assets to {User}",
+                stateId,
+                Context.User.Username);
+            
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
             swapState.AssetFrom = assetFrom.Id;
@@ -230,6 +270,12 @@ namespace SwappyBot.Commands.Slash
             var assetFrom = SupportedAssets[swapState.AssetFrom];
             var assetTo = SupportedAssets[data];
             
+            _logger.LogInformation(
+                "[{StateId}] {User} chose {DestinationAsset} as destination asset",
+                stateId,
+                Context.User.Username,
+                assetTo.Ticker);
+            
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSelectedAssetSelect(
                     $"swap-step3-{stateId}",
@@ -248,6 +294,12 @@ namespace SwappyBot.Commands.Slash
                 $"\n" +
                 $"⚠️️ **Any funds sent outside of this range will be unrecoverable!** ⚠️",
                 components: amount);
+            
+            _logger.LogInformation(
+                "[{StateId}] Asked {User} for the amount of {SourceAsset} they wish to swap",
+                stateId,
+                Context.User.Username,
+                assetFrom.Ticker);
             
             swapState.AssetTo = assetTo.Id;
 
@@ -273,6 +325,11 @@ namespace SwappyBot.Commands.Slash
                         required: true)
                     .Build();
 
+                _logger.LogInformation(
+                    "[{StateId}] {User} wants to provide a custom amount",
+                    stateId,
+                    Context.User.Username);
+                
                 await Context.Interaction.RespondWithModalAsync(modal);
                 return;
             }
@@ -283,6 +340,12 @@ namespace SwappyBot.Commands.Slash
 
             var assetFrom = SupportedAssets[swapState.AssetFrom];
             var assetTo = SupportedAssets[swapState.AssetTo];
+            
+            _logger.LogInformation(
+                "[{StateId}] {User} provided {Amount} as amount",
+                stateId,
+                Context.User.Username,
+                amountText);
             
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildAmountButtons(
@@ -301,6 +364,12 @@ namespace SwappyBot.Commands.Slash
                     "❌ The amount you specified is not a number, please try again.",
                     components: amountButtons);
 
+                _logger.LogInformation(
+                    "[{StateId}] {User} their amount ({Amount}) is not a number",
+                    stateId,
+                    Context.User.Username,
+                    amountText);
+                
                 return;
             }
 
@@ -315,12 +384,26 @@ namespace SwappyBot.Commands.Slash
                     "❌ The amount you specified is outside of the current restrictions, please try again.",
                     components: amountButtons);
 
+                _logger.LogInformation(
+                    "[{StateId}] {User} their amount ({Amount}) is outside of the restrictions",
+                    stateId,
+                    Context.User.Username,
+                    amountText);
+                
                 return;
             }
             
             var address = BuildAddressButton(
                 $"swap-step5-{stateId}",
                 assetTo);
+            
+            _logger.LogInformation(
+                "[{StateId}] Getting quote for {User} from {Amount} {SourceAsset} to {DestinationAsset}",
+                stateId,
+                Context.User.Username,
+                amount,
+                assetFrom.Ticker,
+                assetTo.Ticker);
             
             var quote = await GetQuoteAsync(
                 amount,
@@ -350,6 +433,15 @@ namespace SwappyBot.Commands.Slash
                 $"\n" +
                 $"⚠️ **Double check to ensure the destination address is 100% accurate! Nobody has the ability to recover funds if you input the incorrect destination address!** ⚠️",
                 components: address);
+            
+            _logger.LogInformation(
+                "[{StateId}] Offered quote to {User} from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset}, asking for a destination address now",
+                stateId,
+                Context.User.Username,
+                amount,
+                assetFrom.Ticker,
+                quoteReceive,
+                assetTo.Ticker);
             
             swapState.Amount = amount;
 
@@ -386,6 +478,11 @@ namespace SwappyBot.Commands.Slash
                 .Build();
 
             await Context.Interaction.RespondWithModalAsync(modal);
+            
+            _logger.LogInformation(
+                "[{StateId}] Asked {User} for a destination address",
+                stateId,
+                Context.User.Username);
         }
 
         [ModalInteraction("swap-step5b-*")]
@@ -397,6 +494,12 @@ namespace SwappyBot.Commands.Slash
             var address = data.Components.First().Value;
 
             await DeferAsync();
+            
+            _logger.LogInformation(
+                "[{StateId}] Received {DestinationAddress} from {User} as destination address",
+                stateId,
+                address,
+                Context.User.Username);
             
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
@@ -419,6 +522,11 @@ namespace SwappyBot.Commands.Slash
                     $"❌ You need to provide a valid **{assetTo.Name} ({assetTo.Ticker})** address, please try again.",
                     components: addressButton);
 
+                _logger.LogInformation(
+                    "[{StateId}] {User} provided an empty destination address",
+                    stateId,
+                    Context.User.Username);
+                
                 return;
             }
             
@@ -432,11 +540,24 @@ namespace SwappyBot.Commands.Slash
                     $"❌ The address you specified is not a valid **{assetTo.Name} ({assetTo.Ticker})** address, please try again.",
                     components: addressButton);
 
+                _logger.LogInformation(
+                    "[{StateId}] {User} provided an invalid destination address",
+                    stateId,
+                    Context.User.Username);
+                
                 return;
             }
 
             if (swapState.QuoteTime.Value.AddSeconds(_configuration.QuoteValidityInSeconds.Value) < DateTimeOffset.UtcNow)
             {
+                _logger.LogInformation(
+                    "[{StateId}] Quote for {User} from {Amount} {SourceAsset} to {DestinationAsset} expired, asking a new one",
+                    stateId,
+                    Context.User.Username,
+                    swapState.Amount.Value,
+                    assetFrom.Ticker,
+                    assetTo.Ticker);
+                
                 var quote = await GetQuoteAsync(
                     swapState.Amount.Value,
                     assetFrom,
@@ -480,6 +601,16 @@ namespace SwappyBot.Commands.Slash
                 $"Do you want to proceed with the swap?",
                 components: swapButtons);
             
+            _logger.LogInformation(
+                "[{StateId}] Offered quote to {User} from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress}, now we just need confirmation",
+                stateId,
+                Context.User.Username,
+                swapState.Amount,
+                assetFrom.Ticker,
+                swapState.QuoteReceive,
+                assetTo.Ticker,
+                swapState.DestinationAddress);
+            
             await _dbContext.SaveChangesAsync();
         }
 
@@ -488,6 +619,11 @@ namespace SwappyBot.Commands.Slash
             string stateId)
         {
             await DeferAsync();
+            
+            _logger.LogInformation(
+                "[{StateId}] Generating a deposit address for {User}",
+                stateId,
+                Context.User.Username);
             
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
@@ -512,10 +648,16 @@ namespace SwappyBot.Commands.Slash
                 assetTo,
                 swapState.DestinationAddress,
                 _configuration.CommissionBps.Value);
-
+            
             var depositAddress = deposit.Address;
             var depositBlock = deposit.IssuedBlock;
             var depositChannel = deposit.ChannelId;
+            
+            _logger.LogInformation(
+                "[{StateId}] Generated deposit address {DepositAddress} for {User}",
+                stateId,
+                deposit.Address,
+                Context.User.Username);
 
             swapState.DepositAddress = depositAddress;
             swapState.DepositChannel = $"{depositBlock}-{assetFrom.Network}-{depositChannel}";
@@ -552,6 +694,13 @@ namespace SwappyBot.Commands.Slash
                 $"\n" +
                 $"🙏 Thank you for using **swappy!** Feel free to type `/swap` in the main channel and come back any time! 😎");
             
+            _logger.LogInformation(
+                "[{StateId}] Provided {User} with the deposit instructions to {DepositAddress} -> {ChainflipLink}",
+                stateId,
+                Context.User.Username,
+                depositAddress,
+                $"{_configuration.ExplorerUrl}/{depositBlock}-{assetFrom.Network}-{depositChannel}");
+            
             var threadChannel = (IThreadChannel)Context.Channel;
 
             await threadChannel.ModifyAsync(x =>
@@ -561,11 +710,27 @@ namespace SwappyBot.Commands.Slash
             });
 
             await threadChannel.LeaveAsync();
+            
+            _logger.LogInformation(
+                "[{StateId}] Locked thread with {User}",
+                stateId,
+                Context.User.Username);
 
             await NotifySwap(
                 swapState.Amount.Value,
                 assetFrom, 
                 assetTo);
+            
+            _logger.LogInformation(
+                "[{StateId}] Announced new swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress} for {User}",
+                stateId,
+                swapState.Amount,
+                assetFrom.Ticker,
+                swapState.QuoteReceive,
+                assetTo.Ticker,
+                swapState.DestinationAddress,
+                depositAddress,
+                Context.User.Username);
         }
 
         private async Task NotifySwap(
@@ -585,6 +750,11 @@ namespace SwappyBot.Commands.Slash
         {
             await DeferAsync();
             
+            _logger.LogInformation(
+                "[{StateId}] {User} decided to cancel the swap offer",
+                stateId,
+                Context.User.Username);
+            
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
                     "swap-step6",
@@ -603,6 +773,11 @@ namespace SwappyBot.Commands.Slash
             });
 
             await threadChannel.LeaveAsync();
+            
+            _logger.LogInformation(
+                "[{StateId}] Locked thread with {User}",
+                stateId,
+                Context.User.Username);
             
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
        
@@ -792,114 +967,8 @@ namespace SwappyBot.Commands.Slash
         }
     }
 
-    public record AssetInfo(
-        string Id, 
-        string Ticker,
-        string Name, 
-        string Network, 
-        int Decimals,
-        double MinimumAmount, 
-        double MaximumAmount,
-        double[] SuggestedAmounts,
-        Func<string, bool> AddressValidator);
-
     public class DummyModal : IModal
     {
         public string Title { get; }
-    }
-
-    public class QuoteResponse
-    {
-        [JsonIgnore]
-        public string IngressAmount { get; set; }
-        
-        [JsonPropertyName("egressAmount")]
-        public string EgressAmount { get; set; }
-
-        [JsonPropertyName("intermediateAmount")]
-        public string IntermediateAmount { get; set; }
-        
-        [JsonPropertyName("includedFees")]
-        public QuoteFees[] Fees { get; set; }
-    }
-
-    public class QuoteFees
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-        
-        [JsonPropertyName("chain")]
-        public string Chain { get; set; }
-        
-        [JsonPropertyName("asset")]
-        public string Asset { get; set; }
-        
-        [JsonPropertyName("amount")]
-        public string Amount { get; set; }
-    }
-
-    public class DepositAddress
-    {
-        [JsonPropertyName("result")]
-        public DepositAddressResult Result { get; set; }
-    }
-
-    public class DepositAddressResult
-    {
-        [JsonPropertyName("address")]
-        public string Address { get; set; }
-        
-        [JsonPropertyName("issued_block")]
-        public double IssuedBlock { get; set; }
-        
-        [JsonPropertyName("channel_id")]
-        public double ChannelId { get; set; }
-    }
-
-    public class DepositAddressRequest
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; } = "1";
-
-        [JsonPropertyName("jsonrpc")] 
-        public string JsonRpcVersion { get; } = "2.0";
-
-        [JsonPropertyName("method")] 
-        public string Method { get; } = "broker_request_swap_deposit_address";
-
-        [JsonPropertyName("params")] 
-        public dynamic[] Parameters { get; }
-        
-        public DepositAddressRequest(
-            AssetInfo assetFrom, 
-            AssetInfo assetTo, 
-            string destinationAddress, 
-            int commissionBps)
-        {
-            Parameters =
-            [
-                new ChainId(assetFrom.Network, assetFrom.Ticker),
-                new ChainId(assetTo.Network, assetTo.Ticker),
-                destinationAddress,
-                commissionBps
-            ];
-        }
-    }
-
-    public class ChainId
-    {
-        [JsonPropertyName("chain")] 
-        public string Network { get; }
-        
-        [JsonPropertyName("asset")] 
-        public string Asset { get; }
-
-        public ChainId(
-            string network,
-            string asset)
-        {
-            Network = network;
-            Asset = asset;
-        }
     }
 }
