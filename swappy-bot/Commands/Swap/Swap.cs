@@ -6,6 +6,7 @@ namespace SwappyBot.Commands.Swap
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Json;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Discord;
     using Discord.Interactions;
@@ -940,13 +941,23 @@ namespace SwappyBot.Commands.Swap
             var commission = amount * (commissionPercent / 100);
             var ingressAmount = amount - commission;
             var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
-            
-            var quote = await client.GetFromJsonAsync<QuoteResponse>(
+
+            var quoteResponse = await client.GetAsync(
                 $"quote?amount={convertedAmount}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}");
 
-            quote.IngressAmount = convertedAmount.ToString(CultureInfo.InvariantCulture);
+            if (quoteResponse.IsSuccessStatusCode)
+            {
+                var quote = await quoteResponse.Content.ReadFromJsonAsync<QuoteResponse>();
+                quote.IngressAmount = convertedAmount.ToString(CultureInfo.InvariantCulture);
+                return quote;
+            }
             
-            return quote;
+            _logger.LogError(
+                "Quote API returned {StatusCode}: {Error}",
+                quoteResponse.StatusCode,
+                await quoteResponse.Content.ReadAsStringAsync());
+
+            throw new Exception("Quote API returned an error.");
         }
         
         private async Task<DepositAddressResult?> GetDepositChannelAsync(
