@@ -626,6 +626,12 @@ namespace SwappyBot.Commands.Swap
                 $"\n" +
                 $"🙏 Thank you for using **swappy!** Feel free to type `/swap` in the main channel and come back any time! 😎");
 
+            await Context.Channel.SendMessageAsync(
+                "📱 PS: For mobile phone usage, I am sending the **Deposit Address** separately for easier copying:");
+
+            await Context.Channel.SendMessageAsync(
+                $"**`{depositAddress}`**");
+            
             _logger.LogInformation(
                 "[{StateId}] Provided the deposit instructions to {DepositAddress} -> {ChainflipLink}",
                 stateId,
