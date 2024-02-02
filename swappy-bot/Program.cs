@@ -7,7 +7,6 @@
     using Autofac;
     using Autofac.Extensions.DependencyInjection;
     using Discord;
-    using Discord.Commands;
     using Discord.Interactions;
     using Discord.WebSocket;
     using SwappyBot.Configuration;

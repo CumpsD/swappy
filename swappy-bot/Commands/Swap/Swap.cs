@@ -1,8 +1,6 @@
 namespace SwappyBot.Commands.Swap
 {
     using System;
-    using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Json;
@@ -12,101 +10,12 @@ namespace SwappyBot.Commands.Swap
     using Discord.WebSocket;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Nethereum.Util;
     using SwappyBot.Configuration;
     using SwappyBot.EntityFramework;
-    using SwappyBot.Infrastructure;
     using Emoji = Discord.Emoji;
 
     public class Swap : InteractionModuleBase<SocketInteractionContext>
     {
-        private static readonly Dictionary<string, AssetInfo> SupportedAssets = new()
-        {
-            {
-                "btc",
-                new AssetInfo(
-                    "btc",
-                    "BTC",
-                    "Bitcoin",
-                    "Bitcoin",
-                    8,
-                    0.0007,
-                    0.65,
-                    [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
-                    $"0.00{new string('#', 6)}",
-                    x => AddressValidator.IsValidAddress(x, "btc"))
-            },
-
-            {
-                "dot",
-                new AssetInfo(
-                    "dot",
-                    "DOT",
-                    "Polkadot",
-                    "Polkadot",
-                    10,
-                    4,
-                    4_100,
-                    [10, 20, 50, 150, 300, 700, 1000, 2000, 4000],
-                    $"0.00{new string('#', 8)}",
-                    x => true)
-            },
-
-            {
-                "eth",
-                new AssetInfo(
-                    "eth",
-                    "ETH",
-                    "Ethereum",
-                    "Ethereum",
-                    18,
-                    0.01,
-                    11,
-                    [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10],
-                    $"0.00{new string('#', 16)}",
-                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
-                         AddressUtil.Current.IsValidAddressLength(x) &&
-                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
-            },
-
-            {
-                "flip",
-                new AssetInfo(
-                    "flip",
-                    "FLIP",
-                    "Chainflip",
-                    "Ethereum",
-                    18,
-                    4,
-                    5_700,
-                    [10, 20, 50, 150, 300, 1000, 2000, 4000, 5500],
-                    $"0.00{new string('#', 16)}",
-                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
-                         AddressUtil.Current.IsValidAddressLength(x) &&
-                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
-            },
-
-            {
-                "usdc",
-                new AssetInfo(
-                    "usdc",
-                    "USDC",
-                    "ethUSDC",
-                    "Ethereum",
-                    6,
-                    20,
-                    25_000,
-                    [25, 50, 100, 500, 1000, 2500, 5000, 10000, 20000],
-                    $"0.00{new string('#', 4)}",
-                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
-                         AddressUtil.Current.IsValidAddressLength(x) &&
-                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
-            },
-        };
-
         private readonly ILogger _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly BotConfiguration _configuration;
@@ -226,7 +135,7 @@ namespace SwappyBot.Commands.Swap
             await DeferAsync(ephemeral: true);
 
             var data = ((SocketMessageComponent)Context.Interaction).Data.Values.First();
-            var assetFrom = SupportedAssets[data];
+            var assetFrom = Assets.SupportedAssets[data];
 
             _logger.LogInformation(
                 "[{StateId}] Chose {SourceAsset} as source asset",
@@ -267,8 +176,8 @@ namespace SwappyBot.Commands.Swap
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
             var data = ((SocketMessageComponent)Context.Interaction).Data.Values.First();
-            var assetFrom = SupportedAssets[swapState.AssetFrom];
-            var assetTo = SupportedAssets[data];
+            var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
+            var assetTo = Assets.SupportedAssets[data];
 
             _logger.LogInformation(
                 "[{StateId}] Chose {DestinationAsset} as destination asset",
@@ -335,8 +244,8 @@ namespace SwappyBot.Commands.Swap
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
-            var assetFrom = SupportedAssets[swapState.AssetFrom];
-            var assetTo = SupportedAssets[swapState.AssetTo];
+            var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
+            var assetTo = Assets.SupportedAssets[swapState.AssetTo];
 
             _logger.LogInformation(
                 "[{StateId}] Provided {Amount} as amount",
@@ -398,7 +307,10 @@ namespace SwappyBot.Commands.Swap
                 assetFrom.Ticker,
                 assetTo.Ticker);
 
-            var quote = await GetQuoteAsync(
+            var quote = await Quote.GetQuoteAsync(
+                _logger,
+                _configuration,
+                _httpClientFactory,
                 amount,
                 assetFrom,
                 assetTo);
@@ -509,8 +421,8 @@ namespace SwappyBot.Commands.Swap
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
-            var assetFrom = SupportedAssets[swapState.AssetFrom];
-            var assetTo = SupportedAssets[swapState.AssetTo];
+            var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
+            var assetTo = Assets.SupportedAssets[swapState.AssetTo];
 
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildAddressButton(
@@ -562,7 +474,10 @@ namespace SwappyBot.Commands.Swap
                     assetFrom.Ticker,
                     assetTo.Ticker);
 
-                var quote = await GetQuoteAsync(
+                var quote = await Quote.GetQuoteAsync(
+                    _logger,
+                    _configuration,
+                    _httpClientFactory,
                     swapState.Amount.Value,
                     assetFrom,
                     assetTo);
@@ -654,8 +569,8 @@ namespace SwappyBot.Commands.Swap
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
 
-            var assetFrom = SupportedAssets[swapState.AssetFrom];
-            var assetTo = SupportedAssets[swapState.AssetTo];
+            var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
+            var assetTo = Assets.SupportedAssets[swapState.AssetTo];
 
             swapState.SwapAccepted = DateTimeOffset.UtcNow;
 
@@ -908,12 +823,12 @@ namespace SwappyBot.Commands.Swap
                 .WithMaxValues(1)
                 .WithDisabled(!enabled);
 
-            foreach (var asset in SupportedAssets.Keys)
+            foreach (var asset in Assets.SupportedAssets.Keys)
             {
                 if (excludeAsset != null && asset == excludeAsset.Id)
                     continue;
 
-                var assetInfo = SupportedAssets[asset];
+                var assetInfo = Assets.SupportedAssets[asset];
 
                 assetsSelect = assetsSelect
                     .AddOption(
@@ -940,38 +855,6 @@ namespace SwappyBot.Commands.Swap
             return new ComponentBuilder()
                 .WithSelectMenu(assetsSelect)
                 .Build();
-        }
-
-        private async Task<QuoteResponse?> GetQuoteAsync(
-            double amount,
-            AssetInfo assetFrom,
-            AssetInfo assetTo)
-        {
-            // https://chainflip-swap.chainflip.io/quote?amount=1500000000000000000&srcAsset=ETH&destAsset=BTC
-            using var client = _httpClientFactory.CreateClient("Quote");
-
-            var commissionPercent = (double)_configuration.CommissionBps / 100;
-            var commission = amount * (commissionPercent / 100);
-            var ingressAmount = amount - commission;
-            var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
-
-            var quoteRequest = $"quote?amount={convertedAmount:0}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}";
-            var quoteResponse = await client.GetAsync(quoteRequest);
-
-            if (quoteResponse.IsSuccessStatusCode)
-            {
-                var quote = await quoteResponse.Content.ReadFromJsonAsync<QuoteResponse>();
-                quote.IngressAmount = convertedAmount.ToString(CultureInfo.InvariantCulture);
-                return quote;
-            }
-
-            _logger.LogError(
-                "Quote API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
-                quoteResponse.StatusCode,
-                await quoteResponse.Content.ReadAsStringAsync(),
-                quoteRequest);
-
-            return null;
         }
 
         private async Task<DepositAddressResult?> GetDepositChannelAsync(
