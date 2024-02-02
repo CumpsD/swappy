@@ -574,7 +574,8 @@ namespace SwappyBot.Commands.Swap
 
             swapState.SwapAccepted = DateTimeOffset.UtcNow;
 
-            var deposit = await GetDepositChannelAsync(
+            var deposit = await DepositAddress.GetDepositAddressAsync(
+                _httpClientFactory,
                 assetFrom,
                 assetTo,
                 swapState.DestinationAddress,
@@ -855,23 +856,6 @@ namespace SwappyBot.Commands.Swap
             return new ComponentBuilder()
                 .WithSelectMenu(assetsSelect)
                 .Build();
-        }
-
-        private async Task<DepositAddressResult?> GetDepositChannelAsync(
-            AssetInfo assetFrom,
-            AssetInfo assetTo,
-            string destinationAddress,
-            int commissionBps)
-        {
-            using var client = _httpClientFactory.CreateClient("Deposit");
-
-            var response = await client.PostAsJsonAsync(
-                string.Empty,
-                new DepositAddressRequest(assetFrom, assetTo, destinationAddress, commissionBps));
-
-            var result = await response.Content.ReadFromJsonAsync<DepositAddress>();
-
-            return result.Result;
         }
     }
 
