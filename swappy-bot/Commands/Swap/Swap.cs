@@ -620,6 +620,7 @@ namespace SwappyBot.Commands.Swap
                 $"⚠️ Send **exactly {swapState.Amount} {assetFrom.Ticker}** on the **{assetFrom.Network}** network.\n" +
                 $"\n" +
                 $"🧐 **Verify** the Deposit Address on [Chainflip's official website]({_configuration.ExplorerUrl}/{depositBlock}-{assetFrom.Network}-{depositChannel})!\n" +
+                $"*Keep in mind it can take a few minutes for this page to be accessible, the Chainflip Explorer needs to index the new block first.*\n" +
                 $"\n" +
                 $"ℹ️ In case you have any questions, your swap has reference id **{stateId}**\n" +
                 $"\n" +
