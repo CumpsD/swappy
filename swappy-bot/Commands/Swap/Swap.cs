@@ -504,8 +504,6 @@ namespace SwappyBot.Commands.Swap
                 // var quotePlatformFee = 0.01;
                 // var quoteChainflipFee = 5.49;
 
-                swapState.DestinationAddress = address;
-
                 swapState.QuoteTime = quoteTime;
                 swapState.QuoteDeposit = quoteDeposit;
                 swapState.QuoteReceive = quoteReceive;
@@ -513,6 +511,8 @@ namespace SwappyBot.Commands.Swap
                 // swapState.QuotePlatformFee = quotePlatformFee;
                 // swapState.QuoteChainflipFee = quoteChainflipFee;
             }
+
+            swapState.DestinationAddress = address;
 
             var swapButtons = BuildSwapButtons("swap-step6", stateId);
 
