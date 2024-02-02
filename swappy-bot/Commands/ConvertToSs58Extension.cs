@@ -15,7 +15,8 @@ namespace SwappyBot.Commands
         
         public static string ConvertToSs58(this string hex)
         {
-            var publicKeyBytes = StringToByteArray(hex);
+            var polkaDot = $"00{hex.Replace("0x", string.Empty)}";
+            var publicKeyBytes = StringToByteArray(polkaDot);
             var ss58AddressBytes = Ss58Hash(publicKeyBytes);
             return Base58.Bitcoin.Encode(ss58AddressBytes);
         }
