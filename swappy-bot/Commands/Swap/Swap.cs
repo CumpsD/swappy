@@ -624,10 +624,9 @@ namespace SwappyBot.Commands.Swap
                 $"\n" +
                 $"ℹ️ In case you have any questions, your swap has reference id **{stateId}**\n" +
                 $"\n" +
-                $"🙏 Thank you for using **swappy!** Feel free to type `/swap` in the main channel and come back any time! 😎");
-
-            await Context.Channel.SendMessageAsync(
-                "📱 PS: For mobile phone usage, I am sending the **Deposit Address** separately for easier copying:");
+                $"🙏 Thank you for using **swappy!** Feel free to type `/swap` in the main channel and come back any time! 😎\n" +
+                $"\n" +
+                $"📱 PS: For mobile phone usage, I am sending the **Deposit Address** separately for easier copying:");
 
             await Context.Channel.SendMessageAsync(
                 $"**`{depositAddress}`**");
