@@ -3,7 +3,6 @@ namespace SwappyBot.Commands.Swap
     using System;
     using System.Linq;
     using System.Net.Http;
-    using System.Net.Http.Json;
     using System.Threading.Tasks;
     using Discord;
     using Discord.Interactions;
@@ -307,7 +306,7 @@ namespace SwappyBot.Commands.Swap
                 assetFrom.Ticker,
                 assetTo.Ticker);
 
-            var quote = await Quote.GetQuoteAsync(
+            var quote = await QuoteProvider.GetQuoteAsync(
                 _logger,
                 _configuration,
                 _httpClientFactory,
@@ -474,7 +473,7 @@ namespace SwappyBot.Commands.Swap
                     assetFrom.Ticker,
                     assetTo.Ticker);
 
-                var quote = await Quote.GetQuoteAsync(
+                var quote = await QuoteProvider.GetQuoteAsync(
                     _logger,
                     _configuration,
                     _httpClientFactory,

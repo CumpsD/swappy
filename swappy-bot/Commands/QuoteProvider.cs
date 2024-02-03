@@ -9,7 +9,7 @@ namespace SwappyBot.Commands
     using Microsoft.Extensions.Logging;
     using SwappyBot.Configuration;
 
-    public static class Quote
+    public static class QuoteProvider
     {
         public static async Task<QuoteResponse?> GetQuoteAsync(
             ILogger logger,
@@ -22,13 +22,15 @@ namespace SwappyBot.Commands
             // https://chainflip-swap.chainflip.io/quote?amount=1500000000000000000&srcAsset=ETH&destAsset=BTC
             using var client = httpClientFactory.CreateClient("Quote");
 
-            var commissionPercent = (double)configuration.CommissionBps / 100;
-            var commission = amount * (commissionPercent / 100);
-            var ingressAmount = amount - commission;
-            var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
+            // var commissionPercent = (double)configuration.CommissionBps / 100;
+            // var commission = amount * (commissionPercent / 100);
+            // var ingressAmount = amount - commission;
+            // var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
+            
+            var convertedAmount = amount * Math.Pow(10, assetFrom.Decimals);
 
             var quoteRequest =
-                $"quote?amount={convertedAmount:0}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}";
+                $"quote?amount={convertedAmount:0}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}&brokerCommissionBps={configuration.CommissionBps}";
             var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)

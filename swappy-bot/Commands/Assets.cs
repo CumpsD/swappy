@@ -1,12 +1,21 @@
 namespace SwappyBot.Commands
 {
     using System.Collections.Generic;
+    using Discord.Interactions;
     using Nethereum.Util;
-    using SwappyBot.Commands.Swap;
     using SwappyBot.Infrastructure;
 
     public static class Assets
     {
+        public enum AllAssets
+        {
+            [ChoiceDisplay("Bitcoin (BTC)")] btc,
+            [ChoiceDisplay("Polkadot (DOT)")] dot,
+            [ChoiceDisplay("Ethereum (ETH)")] eth,
+            [ChoiceDisplay("Chainflip (FLIP)")] flip,
+            [ChoiceDisplay("ethUSDC (USDC)")] usdc,
+        }
+        
         public static readonly Dictionary<string, AssetInfo> SupportedAssets = new()
         {
             {
