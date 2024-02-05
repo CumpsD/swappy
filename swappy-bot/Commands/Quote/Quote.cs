@@ -194,13 +194,13 @@ namespace SwappyBot.Commands.Quote
             return new ComponentBuilder()
                 .WithButton(
                     "Swap",
-                    $"swap-step1-{stateId}",
+                    $"swap-step1-{stateId}-false",
                     ButtonStyle.Primary,
                     swapEmoji,
                     disabled: !swapEnabled)
                 .WithButton(
                     "Disclaimer",
-                    $"disclaimer-{stateId}",
+                    $"disclaimer-initial-{stateId}",
                     ButtonStyle.Secondary,
                     disclaimerEmoji,
                     disabled: !swapEnabled)

@@ -105,7 +105,11 @@ namespace SwappyBot.Commands.Swap
             await DeferAsync(ephemeral: true);
             
             await ModifyOriginalResponseAsync(x =>
-                x.Components = BuildIntroButtons(stateId, false));
+                x.Components = BuildIntroButtons(
+                    stateId,
+                    swapEnabled: false,
+                    addDisclaimer: true,
+                    fromDisclaimer: true));
 
             var buttons = BuildIntroButtons(
                 stateId,
@@ -552,7 +556,12 @@ namespace SwappyBot.Commands.Swap
 
             swapState.DestinationAddress = address;
 
-            var swapButtons = BuildSwapButtons("swap-step6", stateId, true);
+            var swapButtons = BuildSwapButtons(
+                "swap-step6", 
+                stateId,
+                enabled: true,
+                addDisclaimer: true,
+                fromDisclaimer: false);
 
             await Context.Channel.SendMessageAsync(
                 $"You are ready to perform a swap from **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**.\n" +
@@ -595,9 +604,17 @@ namespace SwappyBot.Commands.Swap
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
                     "swap-step6",
-                    stateId));
+                    stateId,
+                    enabled: false,
+                    addDisclaimer: false,
+                    fromDisclaimer: false));
 
-            var swapButtons = BuildSwapButtons("swap-step6", stateId, true, false);
+            var swapButtons = BuildSwapButtons(
+                "swap-step6",
+                stateId, 
+                enabled: true,
+                addDisclaimer: false,
+                fromDisclaimer: true);
             
             await Context.Channel.SendMessageAsync(
                 "This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
@@ -613,9 +630,10 @@ namespace SwappyBot.Commands.Swap
                 stateId);
         }
 
-        [ComponentInteraction("swap-step6-ok-*")]
+        [ComponentInteraction("swap-step6-ok-*-*")]
         public async Task SwapStep6Approve(
-            string stateId)
+            string stateId,
+            bool fromDisclaimer)
         {
             await DeferAsync(ephemeral: true);
 
@@ -626,7 +644,10 @@ namespace SwappyBot.Commands.Swap
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
                     "swap-step6",
-                    stateId));
+                    stateId,
+                    enabled: false,
+                    addDisclaimer: !fromDisclaimer,
+                    fromDisclaimer: false));
 
             await Context.Channel.SendMessageAsync(
                 "ℹ️ Chainflip is generating a **Deposit Address** for your swap, please wait a few seconds.");
@@ -748,9 +769,10 @@ namespace SwappyBot.Commands.Swap
                 $"Use `/swap` to use my services as well. 😎");
         }
 
-        [ComponentInteraction("swap-step6-nok-*")]
+        [ComponentInteraction("swap-step6-nok-*-*")]
         public async Task SwapStep6Cancel(
-            string stateId)
+            string stateId,
+            bool fromDisclaimer)
         {
             await DeferAsync(ephemeral: true);
 
@@ -761,7 +783,10 @@ namespace SwappyBot.Commands.Swap
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
                     "swap-step6",
-                    stateId));
+                    stateId,
+                    enabled: false,
+                    addDisclaimer: !fromDisclaimer,
+                    fromDisclaimer: false));
 
             await Context.Channel.SendMessageAsync(
                 "You **cancelled** your swap. No worries, feel free to type `/swap` in the main channel and come back any time! 😎");
@@ -872,20 +897,21 @@ namespace SwappyBot.Commands.Swap
             string id,
             string stateId,
             bool enabled = false,
-            bool addDisclaimer = true)
+            bool addDisclaimer = true,
+            bool fromDisclaimer = false)
         {
             var swapEmoji = new Emoji("🚀");
 
             var builder = new ComponentBuilder()
                 .WithButton(
                     "Swap!",
-                    $"{id}-ok-{stateId}",
+                    $"{id}-ok-{stateId}-{fromDisclaimer}",
                     ButtonStyle.Success,
                     swapEmoji,
                     disabled: !enabled)
                 .WithButton(
                     "Cancel",
-                    $"{id}-nok-{stateId}",
+                    $"{id}-nok-{stateId}-{fromDisclaimer}",
                     ButtonStyle.Danger,
                     disabled: !enabled);
 
