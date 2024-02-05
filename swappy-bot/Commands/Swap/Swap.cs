@@ -606,7 +606,7 @@ namespace SwappyBot.Commands.Swap
                     "swap-step6",
                     stateId,
                     enabled: false,
-                    addDisclaimer: false,
+                    addDisclaimer: true,
                     fromDisclaimer: false));
 
             var swapButtons = BuildSwapButtons(
