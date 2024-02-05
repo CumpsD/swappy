@@ -539,7 +539,7 @@ namespace SwappyBot.Commands.Swap
 
             swapState.DestinationAddress = address;
 
-            var swapButtons = BuildSwapButtons("swap-step6", stateId);
+            var swapButtons = BuildSwapButtons("swap-step6", stateId, true);
 
             await Context.Channel.SendMessageAsync(
                 $"You are ready to perform a swap from **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**.\n" +
@@ -748,8 +748,7 @@ namespace SwappyBot.Commands.Swap
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
                     "swap-step6",
-                    stateId,
-                    false));
+                    stateId));
 
             await Context.Channel.SendMessageAsync(
                 "You **cancelled** your swap. No worries, feel free to type `/swap` in the main channel and come back any time! 😎");
@@ -862,7 +861,6 @@ namespace SwappyBot.Commands.Swap
             bool addDisclaimer = true)
         {
             var swapEmoji = new Emoji("🚀");
-            var disclaimerEmoji = new Emoji("ℹ️");
 
             var builder = new ComponentBuilder()
                 .WithButton(
@@ -883,7 +881,6 @@ namespace SwappyBot.Commands.Swap
                     "Disclaimer",
                     $"disclaimer-final-{stateId}",
                     ButtonStyle.Secondary,
-                    disclaimerEmoji,
                     disabled: !enabled);
             }
             
