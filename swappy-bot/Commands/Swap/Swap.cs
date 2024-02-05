@@ -93,6 +93,28 @@ namespace SwappyBot.Commands.Swap
                     $"Hi! I've created a new **private thread** with you called **Swap {stateId}** to help you with your swap.");
         }
 
+
+        [ComponentInteraction("disclaimer-*")]
+        public async Task Disclaimer(
+            string stateId)
+        {
+            await DeferAsync(ephemeral: true);
+            
+            await ModifyOriginalResponseAsync(x =>
+                x.Components = BuildIntroButtons(stateId, false));
+
+            var buttons = BuildIntroButtons(stateId);
+            
+            await Context.Channel.SendMessageAsync(
+                "This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
+                "The Broker it uses is operated independently of Chainflip Labs GmbH and it’s associates, but instead by **David Cumps**, '_Developer_', with the on-chain address of [`0x6860efbced83aed83a483edd416a19ea45d88441`](https://etherscan.io/address/0x6860efbced83aed83a483edd416a19ea45d88441).\n\n" +
+                "Versions of this bot may exist using modified code or other Broker services by other parties without the knowledge or explicit consent of the _Developer_.\n\n" +
+                "The _Developer_ takes absolutely no responsibility for any losses incurred while using this service, it’s code, or any tool, Discord server, or version of this bot. Users are encouraged to check that the Broker account using this bot or a version of its code is trustworthy, and before sending any swap funds, to verify the state of any deposit channel created for you using third-party block explorers.\n\n" +
+                "By using this service, you acknowledge and agree that any and all losses incurred by you through this bot are your own responsibility.",
+                components: buttons,
+                flags: MessageFlags.SuppressEmbeds);
+        }
+
         [ComponentInteraction("swap-step1-*")]
         public async Task SwapStep1(
             string stateId)
@@ -728,7 +750,7 @@ namespace SwappyBot.Commands.Swap
             var swapEmoji = new Emoji("🚀");
             var pricesEmoji = new Emoji("💵");
             var helpEmoji = new Emoji("❓");
-            var aboutEmoji = new Emoji("ℹ️");
+            var disclaimerEmoji = new Emoji("ℹ️");
 
             return new ComponentBuilder()
                 .WithButton(
@@ -747,11 +769,12 @@ namespace SwappyBot.Commands.Swap
                 //     "get-help",
                 //     ButtonStyle.Secondary,
                 //     helpEmoji)
-                // .WithButton(
-                //     "About",
-                //     "about",
-                //     ButtonStyle.Secondary,
-                //     aboutEmoji)
+                .WithButton(
+                    "Disclaimer",
+                    $"disclaimer-{stateId}",
+                    ButtonStyle.Secondary,
+                    disclaimerEmoji,
+                    disabled: !swapEnabled)
                 .Build();
         }
 

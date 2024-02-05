@@ -189,6 +189,7 @@ namespace SwappyBot.Commands.Quote
             bool swapEnabled = true)
         {
             var swapEmoji = new Emoji("🚀");
+            var disclaimerEmoji = new Emoji("ℹ️");
 
             return new ComponentBuilder()
                 .WithButton(
@@ -196,6 +197,12 @@ namespace SwappyBot.Commands.Quote
                     $"swap-step1-{stateId}",
                     ButtonStyle.Primary,
                     swapEmoji,
+                    disabled: !swapEnabled)
+                .WithButton(
+                    "Disclaimer",
+                    $"disclaimer-{stateId}",
+                    ButtonStyle.Secondary,
+                    disclaimerEmoji,
                     disabled: !swapEnabled)
                 .Build();
         }
