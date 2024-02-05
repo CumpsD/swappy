@@ -94,7 +94,7 @@ namespace SwappyBot.Commands.Swap
                     $"Hi! I've created a new **private thread** with you called **Swap {stateId}** to help you with your swap.");
         }
 
-        [ComponentInteraction("disclaimer-*")]
+        [ComponentInteraction("disclaimer-initial-*")]
         public async Task Disclaimer(
             string stateId)
         {
@@ -804,7 +804,7 @@ namespace SwappyBot.Commands.Swap
                 
                 builder = builder.WithButton(
                     "Disclaimer",
-                    $"disclaimer-{stateId}",
+                    $"disclaimer-initial-{stateId}",
                     ButtonStyle.Secondary,
                     disclaimerEmoji,
                     disabled: !swapEnabled || !addDisclaimer);
