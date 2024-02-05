@@ -802,15 +802,12 @@ namespace SwappyBot.Commands.Swap
                 //     ButtonStyle.Secondary,
                 //     helpEmoji)
                 
-                if (addDisclaimer)
-                {
-                    builder = builder.WithButton(
-                        "Disclaimer",
-                        $"disclaimer-{stateId}",
-                        ButtonStyle.Secondary,
-                        disclaimerEmoji,
-                        disabled: !swapEnabled);
-                }
+                builder = builder.WithButton(
+                    "Disclaimer",
+                    $"disclaimer-{stateId}",
+                    ButtonStyle.Secondary,
+                    disclaimerEmoji,
+                    disabled: !swapEnabled || !addDisclaimer);
 
                 return builder.Build();
         }
@@ -875,14 +872,11 @@ namespace SwappyBot.Commands.Swap
                     ButtonStyle.Danger,
                     disabled: !enabled);
             
-            if (addDisclaimer)
-            {
-                builder = builder.WithButton(
-                    "Disclaimer",
-                    $"disclaimer-final-{stateId}",
-                    ButtonStyle.Secondary,
-                    disabled: !enabled);
-            }
+            builder = builder.WithButton(
+                "Disclaimer",
+                $"disclaimer-final-{stateId}",
+                ButtonStyle.Secondary,
+                disabled: !enabled || !addDisclaimer);
             
             return builder.Build();
         }
