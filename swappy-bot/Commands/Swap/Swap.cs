@@ -48,7 +48,11 @@ namespace SwappyBot.Commands.Swap
                 Context.Guild.Name,
                 Context.User.Username);
 
-            var buttons = BuildIntroButtons(stateId);
+            var buttons = BuildIntroButtons(
+                stateId,
+                swapEnabled: true,
+                addDisclaimer: true,
+                fromDisclaimer: false);
 
             var channel = (ITextChannel)Context.Channel;
             var threadName = $"Swap {stateId}";
@@ -103,7 +107,11 @@ namespace SwappyBot.Commands.Swap
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildIntroButtons(stateId, false));
 
-            var buttons = BuildIntroButtons(stateId, true, false);
+            var buttons = BuildIntroButtons(
+                stateId,
+                swapEnabled: true, 
+                addDisclaimer: false,
+                fromDisclaimer: true);
             
             await Context.Channel.SendMessageAsync(
                 "This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
@@ -119,14 +127,19 @@ namespace SwappyBot.Commands.Swap
                 stateId);
         }
 
-        [ComponentInteraction("swap-step1-*")]
+        [ComponentInteraction("swap-step1-*-*")]
         public async Task SwapStep1(
-            string stateId)
+            string stateId,
+            bool fromDisclaimer)
         {
             await DeferAsync(ephemeral: true);
 
             await ModifyOriginalResponseAsync(x =>
-                x.Components = BuildIntroButtons(stateId, false));
+                x.Components = BuildIntroButtons(
+                    stateId, 
+                    swapEnabled: false,
+                    addDisclaimer: !fromDisclaimer,
+                    fromDisclaimer: false));
 
             var assetFrom = BuildAssetSelect(
                 "Select an asset to send",
@@ -777,7 +790,8 @@ namespace SwappyBot.Commands.Swap
         private static MessageComponent BuildIntroButtons(
             string stateId,
             bool swapEnabled = true,
-            bool addDisclaimer = true)
+            bool addDisclaimer = true,
+            bool fromDisclaimer = false)
         {
             var swapEmoji = new Emoji("🚀");
             var pricesEmoji = new Emoji("💵");
@@ -787,7 +801,7 @@ namespace SwappyBot.Commands.Swap
             var builder = new ComponentBuilder()
                 .WithButton(
                     "Swap",
-                    $"swap-step1-{stateId}",
+                    $"swap-step1-{stateId}-{fromDisclaimer}",
                     ButtonStyle.Primary,
                     swapEmoji,
                     disabled: !swapEnabled);
@@ -801,13 +815,16 @@ namespace SwappyBot.Commands.Swap
                 //     "get-help",
                 //     ButtonStyle.Secondary,
                 //     helpEmoji)
-                
-                builder = builder.WithButton(
-                    "Disclaimer",
-                    $"disclaimer-initial-{stateId}",
-                    ButtonStyle.Secondary,
-                    disclaimerEmoji,
-                    disabled: !swapEnabled || !addDisclaimer);
+
+                if (addDisclaimer)
+                {
+                    builder = builder.WithButton(
+                        "Disclaimer",
+                        $"disclaimer-initial-{stateId}",
+                        ButtonStyle.Secondary,
+                        disclaimerEmoji,
+                        disabled: !swapEnabled);
+                }
 
                 return builder.Build();
         }
@@ -871,13 +888,16 @@ namespace SwappyBot.Commands.Swap
                     $"{id}-nok-{stateId}",
                     ButtonStyle.Danger,
                     disabled: !enabled);
-            
-            builder = builder.WithButton(
-                "Disclaimer",
-                $"disclaimer-final-{stateId}",
-                ButtonStyle.Secondary,
-                disabled: !enabled || !addDisclaimer);
-            
+
+            if (addDisclaimer)
+            {
+                builder = builder.WithButton(
+                    "Disclaimer",
+                    $"disclaimer-final-{stateId}",
+                    ButtonStyle.Secondary,
+                    disabled: !enabled);
+            }
+
             return builder.Build();
         }
 
