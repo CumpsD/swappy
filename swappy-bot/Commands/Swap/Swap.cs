@@ -81,7 +81,8 @@ namespace SwappyBot.Commands.Swap
             await thread.SendMessageAsync(
                 "Hi! It looks like you want to make a swap. I can help you with that.\n" +
                 "Let me start of by mentioning this is a **private thread** and other users **cannot** see this.\n" +
-                "Additionally, I would like to mention this bot is a **community** bot and not an official Chainflip-developed product.\n" +
+                "Additionally, I would like to mention this bot is a **community** bot and not an official Chainflip-developed product. " +
+                "By continuing you acknowledge and agree with the service Disclaimer.\n\n" +
                 "My source can be reviewed at [GitHub in the `swappy` repository](https://github.com/CumpsD/swappy) to verify all steps.\n" +
                 "You can get in touch with my developers on [Discord](https://discord.gg/wwzZ7a7aQn) in case you have questions.\n" +
                 $"If you reach out for support, be sure to mention reference **{stateId}** to make it easier to help you.",
@@ -93,7 +94,6 @@ namespace SwappyBot.Commands.Swap
                     $"Hi! I've created a new **private thread** with you called **Swap {stateId}** to help you with your swap.");
         }
 
-
         [ComponentInteraction("disclaimer-*")]
         public async Task Disclaimer(
             string stateId)
@@ -103,13 +103,13 @@ namespace SwappyBot.Commands.Swap
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildIntroButtons(stateId, false));
 
-            var buttons = BuildIntroButtons(stateId);
+            var buttons = BuildIntroButtons(stateId, true, false);
             
             await Context.Channel.SendMessageAsync(
                 "This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
-                "The Broker it uses is operated independently of Chainflip Labs GmbH and it’s associates, but instead by **David Cumps**, '_Developer_', with the on-chain address of [`0x6860efbced83aed83a483edd416a19ea45d88441`](https://etherscan.io/address/0x6860efbced83aed83a483edd416a19ea45d88441).\n\n" +
+                "The Broker it uses is operated independently of Chainflip Labs GmbH and it's associates, but instead by **David Cumps**, '_Developer_', with the on-chain address of [`0x6860efbced83aed83a483edd416a19ea45d88441`](https://etherscan.io/address/0x6860efbced83aed83a483edd416a19ea45d88441).\n\n" +
                 "Versions of this bot may exist using modified code or other Broker services by other parties without the knowledge or explicit consent of the _Developer_.\n\n" +
-                "The _Developer_ takes absolutely no responsibility for any losses incurred while using this service, it’s code, or any tool, Discord server, or version of this bot. Users are encouraged to check that the Broker account using this bot or a version of its code is trustworthy, and before sending any swap funds, to verify the state of any deposit channel created for you using third-party block explorers.\n\n" +
+                "The _Developer_ takes absolutely no responsibility for any losses incurred while using this service, it's code, or any tool, Discord server, or version of this bot. Users are encouraged to check that the Broker account using this bot or a version of its code is trustworthy, and before sending any swap funds, to verify the state of any deposit channel created for you using third-party block explorers.\n\n" +
                 "By using this service, you acknowledge and agree that any and all losses incurred by you through this bot are your own responsibility.",
                 components: buttons,
                 flags: MessageFlags.SuppressEmbeds);
@@ -552,6 +552,8 @@ namespace SwappyBot.Commands.Swap
                 $"⚠️ **Review your Destination Address and the amounts carefully!** ⚠️\n" +
                 $"The final amount received may vary due to market conditions and network fees.\n" +
                 $"\n" +
+                $"By continuing you acknowledge and agree with the service Disclaimer.\n" +
+                $"\n" +
                 $"Do you want to proceed with the swap?",
                 components: swapButtons);
 
@@ -565,6 +567,29 @@ namespace SwappyBot.Commands.Swap
                 swapState.DestinationAddress);
 
             await _dbContext.SaveChangesAsync();
+        }
+        
+        [ComponentInteraction("disclaimer-final-*")]
+        public async Task DisclaimerFinal(
+            string stateId)
+        {
+            await DeferAsync(ephemeral: true);
+            
+            await ModifyOriginalResponseAsync(x =>
+                x.Components = BuildSwapButtons(
+                    "swap-step6",
+                    stateId));
+
+            var swapButtons = BuildSwapButtons("swap-step6", stateId, true, false);
+            
+            await Context.Channel.SendMessageAsync(
+                "This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
+                "The Broker it uses is operated independently of Chainflip Labs GmbH and it's associates, but instead by **David Cumps**, '_Developer_', with the on-chain address of [`0x6860efbced83aed83a483edd416a19ea45d88441`](https://etherscan.io/address/0x6860efbced83aed83a483edd416a19ea45d88441).\n\n" +
+                "Versions of this bot may exist using modified code or other Broker services by other parties without the knowledge or explicit consent of the _Developer_.\n\n" +
+                "The _Developer_ takes absolutely no responsibility for any losses incurred while using this service, it's code, or any tool, Discord server, or version of this bot. Users are encouraged to check that the Broker account using this bot or a version of its code is trustworthy, and before sending any swap funds, to verify the state of any deposit channel created for you using third-party block explorers.\n\n" +
+                "By using this service, you acknowledge and agree that any and all losses incurred by you through this bot are your own responsibility.",
+                components: swapButtons,
+                flags: MessageFlags.SuppressEmbeds);
         }
 
         [ComponentInteraction("swap-step6-ok-*")]
@@ -580,8 +605,7 @@ namespace SwappyBot.Commands.Swap
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
                     "swap-step6",
-                    stateId,
-                    false));
+                    stateId));
 
             await Context.Channel.SendMessageAsync(
                 "ℹ️ Chainflip is generating a **Deposit Address** for your swap, please wait a few seconds.");
@@ -745,20 +769,21 @@ namespace SwappyBot.Commands.Swap
 
         private static MessageComponent BuildIntroButtons(
             string stateId,
-            bool swapEnabled = true)
+            bool swapEnabled = true,
+            bool addDisclaimer = true)
         {
             var swapEmoji = new Emoji("🚀");
             var pricesEmoji = new Emoji("💵");
             var helpEmoji = new Emoji("❓");
             var disclaimerEmoji = new Emoji("ℹ️");
 
-            return new ComponentBuilder()
+            var builder = new ComponentBuilder()
                 .WithButton(
                     "Swap",
                     $"swap-step1-{stateId}",
                     ButtonStyle.Primary,
                     swapEmoji,
-                    disabled: !swapEnabled)
+                    disabled: !swapEnabled);
                 // .WithButton(
                 //     "Rates",
                 //     "get-rates",
@@ -769,13 +794,18 @@ namespace SwappyBot.Commands.Swap
                 //     "get-help",
                 //     ButtonStyle.Secondary,
                 //     helpEmoji)
-                .WithButton(
-                    "Disclaimer",
-                    $"disclaimer-{stateId}",
-                    ButtonStyle.Secondary,
-                    disclaimerEmoji,
-                    disabled: !swapEnabled)
-                .Build();
+                
+                if (addDisclaimer)
+                {
+                    builder = builder.WithButton(
+                        "Disclaimer",
+                        $"disclaimer-{stateId}",
+                        ButtonStyle.Secondary,
+                        disclaimerEmoji,
+                        disabled: !swapEnabled);
+                }
+
+                return builder.Build();
         }
 
         private static MessageComponent BuildAmountButtons(
@@ -820,11 +850,13 @@ namespace SwappyBot.Commands.Swap
         private static MessageComponent BuildSwapButtons(
             string id,
             string stateId,
-            bool enabled = true)
+            bool enabled = false,
+            bool addDisclaimer = true)
         {
             var swapEmoji = new Emoji("🚀");
+            var disclaimerEmoji = new Emoji("ℹ️");
 
-            return new ComponentBuilder()
+            var builder = new ComponentBuilder()
                 .WithButton(
                     "Swap!",
                     $"{id}-ok-{stateId}",
@@ -835,8 +867,19 @@ namespace SwappyBot.Commands.Swap
                     "Cancel",
                     $"{id}-nok-{stateId}",
                     ButtonStyle.Danger,
-                    disabled: !enabled)
-                .Build();
+                    disabled: !enabled);
+            
+            if (addDisclaimer)
+            {
+                builder = builder.WithButton(
+                    "Disclaimer",
+                    $"disclaimer-final-{stateId}",
+                    ButtonStyle.Secondary,
+                    disclaimerEmoji,
+                    disabled: !enabled);
+            }
+            
+            return builder.Build();
         }
 
         private static MessageComponent BuildAssetSelect(
