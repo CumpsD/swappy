@@ -113,6 +113,10 @@ namespace SwappyBot.Commands.Swap
                 "By using this service, you acknowledge and agree that any and all losses incurred by you through this bot are your own responsibility.",
                 components: buttons,
                 flags: MessageFlags.SuppressEmbeds);
+            
+            _logger.LogInformation(
+                "[{StateId}] Shown Initial Disclaimer",
+                stateId);
         }
 
         [ComponentInteraction("swap-step1-*")]
@@ -590,6 +594,10 @@ namespace SwappyBot.Commands.Swap
                 "By using this service, you acknowledge and agree that any and all losses incurred by you through this bot are your own responsibility.",
                 components: swapButtons,
                 flags: MessageFlags.SuppressEmbeds);
+            
+            _logger.LogInformation(
+                "[{StateId}] Shown Final Disclaimer",
+                stateId);
         }
 
         [ComponentInteraction("swap-step6-ok-*")]
