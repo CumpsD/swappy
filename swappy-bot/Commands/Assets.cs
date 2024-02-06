@@ -27,8 +27,8 @@ namespace SwappyBot.Commands
                     "Bitcoin",
                     8,
                     0.0007,
-                    0.65,
-                    [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5],
+                    1.2,
+                    [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0],
                     x => AddressValidator.IsValidAddress(x, "btc"),
                     x => x)
             },
@@ -42,8 +42,8 @@ namespace SwappyBot.Commands
                     "Polkadot",
                     10,
                     4,
-                    4_100,
-                    [10, 20, 50, 150, 300, 700, 1000, 2000, 4000],
+                    7_500,
+                    [10, 20, 50, 150, 300, 700, 1000, 2000, 4000, 7000],
                     x => true,
                     hex => hex.ConvertToSs58())
             },
@@ -57,8 +57,8 @@ namespace SwappyBot.Commands
                     "Ethereum",
                     18,
                     0.01,
-                    11,
-                    [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10],
+                    22,
+                    [0.02, 0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20],
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -75,8 +75,8 @@ namespace SwappyBot.Commands
                     "Ethereum",
                     18,
                     4,
-                    5_700,
-                    [10, 20, 50, 150, 300, 1000, 2000, 4000, 5500],
+                    10_000,
+                    [10, 20, 50, 150, 300, 1000, 2000, 4000, 6500, 9000],
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
@@ -93,8 +93,8 @@ namespace SwappyBot.Commands
                     "Ethereum",
                     6,
                     20,
-                    25_000,
-                    [25, 50, 100, 500, 1000, 2500, 5000, 10000, 20000],
+                    50_000,
+                    [25, 50, 100, 500, 1000, 2500, 5000, 10000, 25000, 40000],
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
