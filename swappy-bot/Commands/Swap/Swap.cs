@@ -761,12 +761,17 @@ namespace SwappyBot.Commands.Swap
             AssetInfo assetFrom,
             AssetInfo assetTo)
         {
-            var notificationChannel =
-                (ITextChannel)Context.Client.GetChannel(_configuration.NotificationChannelId.Value);
+            foreach (var notificationChannelId in _configuration.NotificationChannelIds)
+            {
+                var notificationChannel =
+                    (ITextChannel)Context.Client.GetChannel(notificationChannelId);
             
-            await notificationChannel.SendMessageAsync(
-                $"I have just started a swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
-                $"Use `/swap` to use my services as well. 😎");
+                await notificationChannel.SendMessageAsync(
+                    $"I have just started a swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
+                    $"Use `/swap` to use my services as well. 😎");
+
+                await Task.Delay(2000);
+            }
         }
 
         [ComponentInteraction("swap-step6-nok-*-*")]
