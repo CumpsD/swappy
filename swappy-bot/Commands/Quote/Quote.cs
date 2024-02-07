@@ -156,7 +156,7 @@ namespace SwappyBot.Commands.Quote
             await thread.SendMessageAsync(
                 "Hi! It looks like you want to make a swap. I can help you with that.\n\n" +
                 "Let me start of by mentioning this is a **private thread** and other users **cannot** see this.\n" +
-                "Additionally, I would like to mention this bot is a **community** bot and not an official Chainflip-developed product. " +
+                "Additionally, I would like to mention this bot is a **community** bot and **not developed by Chainflip Labs GmbH**. " +
                 "By continuing you acknowledge and agree with the Disclaimer (click the button to view).\n\n" +
                 "My source can be reviewed at [GitHub in the `swappy` repository](https://github.com/CumpsD/swappy) to verify all steps.\n" +
                 "You can get in touch with my developers on [Discord](https://discord.gg/wwzZ7a7aQn) in case you have questions.\n" +
