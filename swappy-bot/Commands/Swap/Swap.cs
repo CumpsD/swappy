@@ -118,7 +118,7 @@ namespace SwappyBot.Commands.Swap
                 fromDisclaimer: true);
             
             await Context.Channel.SendMessageAsync(
-                "This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
+                "This Discord Bot, `Swappy`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
                 "The Broker it uses is operated independently of Chainflip Labs GmbH and it's associates, but instead by **David Cumps**, '_Developer_', with the on-chain address of [`0x6860efbced83aed83a483edd416a19ea45d88441`](https://etherscan.io/address/0x6860efbced83aed83a483edd416a19ea45d88441).\n\n" +
                 "Versions of this bot may exist using modified code or other Broker services by other parties without the knowledge or explicit consent of the _Developer_.\n\n" +
                 "The _Developer_ takes absolutely no responsibility for any losses incurred while using this service, it's code, or any tool, Discord server, or version of this bot. Users are encouraged to check that the Broker account using this bot or a version of its code is trustworthy, and before sending any swap funds, to verify the state of any deposit channel created for you using third-party block explorers.\n\n" +
@@ -617,7 +617,7 @@ namespace SwappyBot.Commands.Swap
                 fromDisclaimer: true);
             
             await Context.Channel.SendMessageAsync(
-                "This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
+                "This Discord Bot, `Swappy`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io).\n\n" +
                 "The Broker it uses is operated independently of Chainflip Labs GmbH and it's associates, but instead by **David Cumps**, '_Developer_', with the on-chain address of [`0x6860efbced83aed83a483edd416a19ea45d88441`](https://etherscan.io/address/0x6860efbced83aed83a483edd416a19ea45d88441).\n\n" +
                 "Versions of this bot may exist using modified code or other Broker services by other parties without the knowledge or explicit consent of the _Developer_.\n\n" +
                 "The _Developer_ takes absolutely no responsibility for any losses incurred while using this service, it's code, or any tool, Discord server, or version of this bot. Users are encouraged to check that the Broker account using this bot or a version of its code is trustworthy, and before sending any swap funds, to verify the state of any deposit channel created for you using third-party block explorers.\n\n" +
@@ -711,7 +711,7 @@ namespace SwappyBot.Commands.Swap
                 $"\n" +
                 $"ℹ️ In case you have any questions, your swap has reference id **{stateId}**\n" +
                 $"\n" +
-                $"🙏 Thank you for using **swappy!** Feel free to type `/swap` in the main channel and come back any time! 😎\n" +
+                $"🙏 Thank you for using **Swappy**! Feel free to type `/swap` in the main channel and come back any time! 😎\n" +
                 $"\n" +
                 $"📱 PS: For mobile phone usage, I am sending the **Deposit Address** separately for easier copying:");
 
