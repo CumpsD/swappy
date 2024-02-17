@@ -95,8 +95,6 @@
             builder
                 .RegisterModule(new LoggingModule(configuration, services));
 
-            var tempProvider = services.BuildServiceProvider();
-            var loggerFactory = tempProvider.GetRequiredService<ILoggerFactory>();
             var connectionString = configuration.GetConnectionString("Bot");
 
             var botConfiguration = configuration
@@ -128,8 +126,7 @@
                 
                 .AddDbContextPool<BotContext>((provider, options) => options
                     .UseLoggerFactory(provider.GetRequiredService<ILoggerFactory>())
-                    .UseMySql(connectionString, Db.Version)
-                    .UseLoggerFactory(loggerFactory));
+                    .UseMySql(connectionString, Db.Version));
 
             builder
                 .Register(x => new EntityFrameworkLogger(x.Resolve<ILoggerFactory>()))

@@ -40,7 +40,6 @@ namespace SwappyBot.Commands
             AddressConverter = addressConverter;
             
             FormatString = $"0.00{new string('#', decimals - 2)}";
-
         }
     }
 }
