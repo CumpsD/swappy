@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="300" src="https://github.com/CumpsD/swappy/raw/main/assets/swappy-logo.png">
+  <img width="120" src="https://github.com/CumpsD/swappy/raw/main/assets/swappy-logo.png">
 	<h1>Swappy</h1>
 	<p>
 		<b>A Discord bot to swap crypto currencies</b>
