@@ -56,7 +56,7 @@ The user also has the option to request a swap directly instead of a quote.
 
 ![a](https://github.com/CumpsD/swappy/raw/main/assets/step1.png "a")
 
-Note: The 0x...is a Swappy reference number for the bot. This is the only information that a user can use beside referencing on chain data to query about the swap request.
+Note: The *0x...* is a Swappy reference number for the bot. This is the only information that a user can use beside referencing on chain data to query about the swap request.
 
 ![a](https://github.com/CumpsD/swappy/raw/main/assets/step2.png "a")
 ![a](https://github.com/CumpsD/swappy/raw/main/assets/step3.png "a")
