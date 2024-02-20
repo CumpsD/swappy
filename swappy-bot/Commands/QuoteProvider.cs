@@ -19,6 +19,7 @@ namespace SwappyBot.Commands
             AssetInfo assetFrom,
             AssetInfo assetTo)
         {
+            // /quote?amount=10000&srcChain=Bitcoin&srcAsset=BTC&destChain=Ethereum&destAsset=ETH
             // https://chainflip-swap.chainflip.io/quote?amount=1500000000000000000&srcAsset=ETH&destAsset=BTC
             using var client = httpClientFactory.CreateClient("Quote");
 
@@ -30,7 +31,11 @@ namespace SwappyBot.Commands
             var convertedAmount = amount * Math.Pow(10, assetFrom.Decimals);
 
             var quoteRequest =
-                $"quote?amount={convertedAmount:0}&srcAsset={assetFrom.Ticker}&destAsset={assetTo.Ticker}&brokerCommissionBps={configuration.CommissionBps}";
+                $"quote?amount={convertedAmount:0}" +
+                $"&srcChain={assetFrom.Network}&srcAsset={assetFrom.Ticker}" +
+                $"&destChain={assetTo.Network}&destAsset={assetTo.Ticker}" +
+                $"&brokerCommissionBps={configuration.CommissionBps}";
+            
             var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)
