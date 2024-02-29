@@ -52,7 +52,7 @@ namespace SwappyBot.Commands.Swap
         public double IssuedBlock { get; set; }
         
         [JsonPropertyName("network")]
-        public double Network { get; set; }
+        public string Network { get; set; }
         
         [JsonPropertyName("channelId")]
         public double ChannelId { get; set; }
