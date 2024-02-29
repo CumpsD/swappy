@@ -21,7 +21,7 @@ namespace SwappyBot.Commands
             
             var quoteRequest =
                 $"quote" +
-                $"?amount={amount:0}" +
+                $"?amount={amount}" +
                 $"&sourceAsset={assetFrom.Id}" +
                 $"&destinationAsset={assetTo.Id}" +
                 $"&apiKey={configuration.BrokerApiKey}";
