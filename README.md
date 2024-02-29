@@ -3,6 +3,8 @@
 	<h1>Swappy</h1>
 	<p>
 		<b>A Discord bot to swap crypto currencies</b>
+		<br>
+		<a href="https://swappy.be"><b>https://swappy.be</b></a>
 	</p>
 	<br>
 </div>
