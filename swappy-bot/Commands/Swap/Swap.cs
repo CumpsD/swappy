@@ -680,7 +680,7 @@ namespace SwappyBot.Commands.Swap
                 deposit.Address);
 
             swapState.DepositAddress = depositAddress;
-            swapState.DepositChannel = $"{depositBlock}-{assetFrom.Network}-{depositChannel}";
+            swapState.DepositChannel = $"{depositBlock}-{deposit.Network}-{depositChannel}";
             swapState.DepositGenerated = DateTimeOffset.UtcNow;
 
             await _dbContext.SaveChangesAsync();
@@ -706,7 +706,7 @@ namespace SwappyBot.Commands.Swap
                 $"\n" +
                 $"📩 **Deposit Address**: **`{depositAddress}`**\n" +
                 $"\n" +
-                $"⚠️ Send **exactly {swapState.Amount} {assetFrom.Ticker}** on the **{assetFrom.Network}** network.\n" +
+                $"⚠️ Send **exactly {swapState.Amount} {assetFrom.Ticker}** on the **{deposit.Network}** network.\n" +
                 $"\n" +
                 $"🧐 **Verify** the Deposit Address on [Chainflip's official website]({deposit.ExplorerUrl})!\n" +
                 $"*Keep in mind it can take a few minutes for this page to be accessible, the Chainflip Explorer needs to index the new block first.*\n" +
