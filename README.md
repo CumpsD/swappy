@@ -1,8 +1,8 @@
 ![a](https://github.com/CumpsD/swappy/raw/main/assets/header.png "a")
 
-# Swappy
+# Swappy - [swappy.be](https://swappy.be)
 
-> **A Discord bot to swap crypto currencies** [https://swappy.be](https://swappy.be)
+> **A Discord bot to swap crypto currencies**
 
 Built on [Chainflip](https://chainflip.io), a game-changing protocol for native cross-chain swaps.
 
