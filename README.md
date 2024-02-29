@@ -2,7 +2,7 @@
 
 # Swappy
 
-> **A Discord bot to swap crypto currencies**
+> **A Discord bot to swap crypto currencies** [https://swappy.be](https://swappy.be)
 
 Built on [Chainflip](https://chainflip.io), a game-changing protocol for native cross-chain swaps.
 
