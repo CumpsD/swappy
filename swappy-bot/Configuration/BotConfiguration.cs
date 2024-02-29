@@ -31,28 +31,14 @@ namespace SwappyBot.Configuration
         
         [Required]
         [NotNull]
-        public int? CommissionBps
+        public string? BrokerApiKey
         {
             get; init;
         }
         
         [Required]
         [NotNull]
-        public string? ExplorerUrl
-        {
-            get; init;
-        }
-        
-        [Required]
-        [NotNull]
-        public string? QuoteUrl
-        {
-            get; init;
-        }
-        
-        [Required]
-        [NotNull]
-        public string? DepositUrl
+        public string? BrokerUrl
         {
             get; init;
         }

@@ -661,12 +661,14 @@ namespace SwappyBot.Commands.Swap
 
             swapState.SwapAccepted = DateTimeOffset.UtcNow;
 
-            var deposit = await DepositAddress.GetDepositAddressAsync(
+            var deposit = await DepositAddressProvider.GetDepositAddressAsync(
+                _logger,
+                _configuration,
                 _httpClientFactory,
+                swapState.Amount.Value,
                 assetFrom,
                 assetTo,
-                swapState.DestinationAddress,
-                _configuration.CommissionBps.Value);
+                swapState.DestinationAddress);
 
             var depositAddress = deposit.Address;
             var depositBlock = deposit.IssuedBlock;
@@ -706,7 +708,7 @@ namespace SwappyBot.Commands.Swap
                 $"\n" +
                 $"⚠️ Send **exactly {swapState.Amount} {assetFrom.Ticker}** on the **{assetFrom.Network}** network.\n" +
                 $"\n" +
-                $"🧐 **Verify** the Deposit Address on [Chainflip's official website]({_configuration.ExplorerUrl}{depositBlock}-{assetFrom.Network}-{depositChannel})!\n" +
+                $"🧐 **Verify** the Deposit Address on [Chainflip's official website]({deposit.ExplorerUrl})!\n" +
                 $"*Keep in mind it can take a few minutes for this page to be accessible, the Chainflip Explorer needs to index the new block first.*\n" +
                 $"\n" +
                 $"ℹ️ In case you have any questions, your swap has reference id **{stateId}**\n" +
@@ -722,7 +724,7 @@ namespace SwappyBot.Commands.Swap
                 "[{StateId}] Provided the deposit instructions to {DepositAddress} -> {ChainflipLink}",
                 stateId,
                 depositAddress,
-                $"{_configuration.ExplorerUrl}{depositBlock}-{assetFrom.Network}-{depositChannel}");
+                deposit.ExplorerUrl);
 
             var threadChannel = (IThreadChannel)Context.Channel;
 

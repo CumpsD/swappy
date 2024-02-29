@@ -29,8 +29,7 @@ namespace SwappyBot.Commands
                     0.0007,
                     1.2,
                     [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0],
-                    BitcoinAddressValidator.IsValidAddress,
-                    x => x)
+                    BitcoinAddressValidator.IsValidAddress)
             },
 
             {
@@ -44,8 +43,7 @@ namespace SwappyBot.Commands
                     4,
                     7_500,
                     [10, 20, 50, 150, 300, 700, 1000, 2000, 4000, 7000],
-                    x => true,
-                    hex => hex.ConvertToSs58())
+                    x => true)
             },
 
             {
@@ -62,8 +60,7 @@ namespace SwappyBot.Commands
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()),
-                    x => x)
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
             },
 
             {
@@ -80,8 +77,7 @@ namespace SwappyBot.Commands
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()),
-                    x => x)
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
             },
 
             {
@@ -98,8 +94,7 @@ namespace SwappyBot.Commands
                     x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
-                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()),
-                    x => x)
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
             },
         };
     }

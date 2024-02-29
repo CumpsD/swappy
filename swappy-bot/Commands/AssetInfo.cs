@@ -14,7 +14,6 @@ namespace SwappyBot.Commands
         public double[] SuggestedAmounts { get; }
         public string FormatString { get; }
         public Func<string, bool> AddressValidator { get; }
-        public Func<string, string> AddressConverter { get; }
 
         public AssetInfo(
             string id, 
@@ -25,8 +24,7 @@ namespace SwappyBot.Commands
             double minimumAmount, 
             double maximumAmount,
             double[] suggestedAmounts,
-            Func<string, bool> addressValidator,
-            Func<string, string> addressConverter)
+            Func<string, bool> addressValidator)
         {
             Id = id;
             Ticker = ticker;
@@ -37,7 +35,6 @@ namespace SwappyBot.Commands
             MaximumAmount = maximumAmount;
             SuggestedAmounts = suggestedAmounts;
             AddressValidator = addressValidator;
-            AddressConverter = addressConverter;
             
             FormatString = $"0.00{new string('#', decimals - 2)}";
         }

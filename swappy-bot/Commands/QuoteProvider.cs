@@ -19,34 +19,29 @@ namespace SwappyBot.Commands
             AssetInfo assetFrom,
             AssetInfo assetTo)
         {
-            // /quote?amount=10000&srcChain=Bitcoin&srcAsset=BTC&destChain=Ethereum&destAsset=ETH
-            // https://chainflip-swap.chainflip.io/quote?amount=1500000000000000000&srcAsset=ETH&destAsset=BTC
-            using var client = httpClientFactory.CreateClient("Quote");
-
-            // var commissionPercent = (double)configuration.CommissionBps / 100;
-            // var commission = amount * (commissionPercent / 100);
-            // var ingressAmount = amount - commission;
-            // var convertedAmount = ingressAmount * Math.Pow(10, assetFrom.Decimals);
+            using var client = httpClientFactory.CreateClient("Broker");
             
-            var convertedAmount = amount * Math.Pow(10, assetFrom.Decimals);
-
             var quoteRequest =
-                $"quote?amount={convertedAmount:0}" +
-                $"&srcChain={assetFrom.Network}&srcAsset={assetFrom.Ticker}" +
-                $"&destChain={assetTo.Network}&destAsset={assetTo.Ticker}" +
-                $"&brokerCommissionBps={configuration.CommissionBps}";
+                $"quote" +
+                $"?amount={amount:0}" +
+                $"&sourceAsset={assetFrom.Id}" +
+                $"&destinationAsset={assetTo.Id}" +
+                $"&apiKey={configuration.BrokerApiKey}";
             
             var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)
             {
                 var quote = await quoteResponse.Content.ReadFromJsonAsync<QuoteResponse>();
+                
+                var convertedAmount = amount * Math.Pow(10, assetFrom.Decimals);
                 quote.IngressAmount = convertedAmount.ToString(CultureInfo.InvariantCulture);
+                
                 return quote;
             }
 
             logger.LogError(
-                "Quote API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
+                "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
                 quoteResponse.StatusCode,
                 await quoteResponse.Content.ReadAsStringAsync(),
                 quoteRequest);
@@ -63,9 +58,6 @@ namespace SwappyBot.Commands
         [JsonPropertyName("egressAmount")]
         public string EgressAmount { get; set; }
 
-        [JsonPropertyName("intermediateAmount")]
-        public string IntermediateAmount { get; set; }
-        
         [JsonPropertyName("includedFees")]
         public QuoteFees[] Fees { get; set; }
     }

@@ -4,107 +4,60 @@ namespace SwappyBot.Commands.Swap
     using System.Net.Http.Json;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
+    using SwappyBot.Configuration;
 
-    public class DepositAddress
+    public class DepositAddressProvider
     {
-        public string Address { get; }
-
-        public double IssuedBlock { get; }
-
-        public double ChannelId { get; }
-
-        private DepositAddress(
-            AssetInfo asset, 
-            DepositAddressResult result)
-        {
-            Address = asset.AddressConverter(result.Address);
-            IssuedBlock = result.IssuedBlock;
-            ChannelId = result.ChannelId;
-        }
-
-        public static async Task<DepositAddress?> GetDepositAddressAsync(
+        public static async Task<DepositAddressResponse?> GetDepositAddressAsync(
+            ILogger logger,
+            BotConfiguration configuration,
             IHttpClientFactory httpClientFactory,
+            double amount,
             AssetInfo assetFrom,
             AssetInfo assetTo,
-            string destinationAddress,
-            int commissionBps)
+            string destinationAddress)
         {
-            using var client = httpClientFactory.CreateClient("Deposit");
+            using var client = httpClientFactory.CreateClient("Broker");
 
-            var response = await client.PostAsJsonAsync(
-                string.Empty,
-                new DepositAddressRequest(assetFrom, assetTo, destinationAddress, commissionBps));
+            var swapRequest =
+                $"swap" +
+                $"?amount={amount:0}" +
+                $"&sourceAsset={assetFrom.Id}" +
+                $"&destinationAsset={assetTo.Id}" +
+                $"&destinationAddress={destinationAddress}" +
+                $"&apiKey={configuration.BrokerApiKey}";
+            
+            var swapResponse = await client.GetAsync(swapRequest);
+            
+            if (swapResponse.IsSuccessStatusCode)
+                return await swapResponse.Content.ReadFromJsonAsync<DepositAddressResponse>();
 
-            var result = await response.Content.ReadFromJsonAsync<DepositAddressResponse>();
+            logger.LogError(
+                "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
+                swapResponse.StatusCode,
+                await swapResponse.Content.ReadAsStringAsync(),
+                swapRequest);
 
-            return new DepositAddress(
-                assetFrom,
-                result.Result);
+            return null;
         }
     }
     
     public class DepositAddressResponse
     {
-        [JsonPropertyName("result")]
-        public DepositAddressResult Result { get; set; }
-    }
-
-    public class DepositAddressResult
-    {
         [JsonPropertyName("address")]
         public string Address { get; set; }
         
-        [JsonPropertyName("issued_block")]
+        [JsonPropertyName("issuedBlock")]
         public double IssuedBlock { get; set; }
         
-        [JsonPropertyName("channel_id")]
+        [JsonPropertyName("network")]
+        public double Network { get; set; }
+        
+        [JsonPropertyName("channelId")]
         public double ChannelId { get; set; }
-    }
-    
-    public class DepositAddressRequest
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; } = "1";
-
-        [JsonPropertyName("jsonrpc")] 
-        public string JsonRpcVersion { get; } = "2.0";
-
-        [JsonPropertyName("method")] 
-        public string Method { get; } = "broker_request_swap_deposit_address";
-
-        [JsonPropertyName("params")] 
-        public dynamic[] Parameters { get; }
         
-        public DepositAddressRequest(
-            AssetInfo assetFrom, 
-            AssetInfo assetTo, 
-            string destinationAddress, 
-            int commissionBps)
-        {
-            Parameters =
-            [
-                new ChainId(assetFrom.Network, assetFrom.Ticker),
-                new ChainId(assetTo.Network, assetTo.Ticker),
-                destinationAddress,
-                commissionBps
-            ];
-        }
-    }
-    
-    public class ChainId
-    {
-        [JsonPropertyName("chain")] 
-        public string Network { get; }
-        
-        [JsonPropertyName("asset")] 
-        public string Asset { get; }
-
-        public ChainId(
-            string network,
-            string asset)
-        {
-            Network = network;
-            Asset = asset;
-        }
+        [JsonPropertyName("explorerUrl")]
+        public string ExplorerUrl { get; set; }
     }
 }

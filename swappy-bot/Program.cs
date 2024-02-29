@@ -105,20 +105,11 @@
                 .ConfigureAndValidate<BotConfiguration>(configuration.GetSection(BotConfiguration.Section))
                 
                 .AddHttpClient(
-                    "Quote",
+                    "Broker",
                     x =>
                     {
-                        x.BaseAddress = new Uri(botConfiguration.QuoteUrl);
-                        x.DefaultRequestHeaders.UserAgent.ParseAdd("discord-swappy");
-                    })
-                
-                .Services
-                    
-                .AddHttpClient(
-                    "Deposit",
-                    x =>
-                    {
-                        x.BaseAddress = new Uri(botConfiguration.DepositUrl);
+                        x.BaseAddress = new Uri(botConfiguration.BrokerUrl);
+                        x.DefaultRequestHeaders.UserAgent.Clear();
                         x.DefaultRequestHeaders.UserAgent.ParseAdd("discord-swappy");
                     })
                 
