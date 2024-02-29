@@ -69,7 +69,7 @@ The last step to complete the swap is to send the submitted amount for the swap 
 
 ### Disclaimer
 
-This Discord Bot, `swappy!`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io). 
+This Discord Bot, `Swappy`, is offered as an unofficial open-source tool ([github.com/CumpsD/swappy](https://github.com/CumpsD/swappy)) to perform non-custodial swaps over the [Chainflip Protocol](https://chainflip.io). 
 
 The Broker it uses is operated independently of Chainflip Labs GmbH and it's associates, but instead by **David Cumps**, '_Developer_', with the on-chain address of [`0x6860efbced83aed83a483edd416a19ea45d88441`](https://etherscan.io/address/0x6860efbced83aed83a483edd416a19ea45d88441).
 
