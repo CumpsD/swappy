@@ -1,13 +1,8 @@
-<div align="center">
-  <img width="120" src="https://github.com/CumpsD/swappy/raw/main/assets/swappy-logo.png">
-	<h1>Swappy</h1>
-	<p>
-		<b>A Discord bot to swap crypto currencies</b>
-		<br>
-		<a href="https://swappy.be"><b>https://swappy.be</b></a>
-	</p>
-	<br>
-</div>
+![a](https://github.com/CumpsD/swappy/raw/main/assets/header.png "a")
+
+# Swappy
+
+> **A Discord bot to swap crypto currencies**
 
 Built on [Chainflip](https://chainflip.io), a game-changing protocol for native cross-chain swaps.
 
