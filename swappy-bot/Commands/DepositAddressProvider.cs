@@ -1,4 +1,4 @@
-namespace SwappyBot.Commands.Swap
+namespace SwappyBot.Commands
 {
     using System.Net.Http;
     using System.Net.Http.Json;
@@ -7,13 +7,13 @@ namespace SwappyBot.Commands.Swap
     using Microsoft.Extensions.Logging;
     using SwappyBot.Configuration;
 
-    public class DepositAddressProvider
+    public static class DepositAddressProvider
     {
         public static async Task<DepositAddressResponse?> GetDepositAddressAsync(
             ILogger logger,
             BotConfiguration configuration,
             IHttpClientFactory httpClientFactory,
-            double amount,
+            decimal amount,
             AssetInfo assetFrom,
             AssetInfo assetTo,
             string destinationAddress)
@@ -49,13 +49,13 @@ namespace SwappyBot.Commands.Swap
         public string Address { get; set; }
         
         [JsonPropertyName("issuedBlock")]
-        public double IssuedBlock { get; set; }
+        public ulong IssuedBlock { get; set; }
         
         [JsonPropertyName("network")]
         public string Network { get; set; }
         
         [JsonPropertyName("channelId")]
-        public double ChannelId { get; set; }
+        public ulong ChannelId { get; set; }
         
         [JsonPropertyName("explorerUrl")]
         public string ExplorerUrl { get; set; }

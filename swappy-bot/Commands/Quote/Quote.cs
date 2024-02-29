@@ -28,7 +28,7 @@ namespace SwappyBot.Commands.Quote
         [EnabledInDm(false)]
         [SlashCommand(SlashCommands.Quote, "Get a quote between two assets.")]
         public async Task Execute(
-            [Summary(description: "Amount to get a quote for")][MinValue(0)] double amount,
+            [Summary(description: "Amount to get a quote for")][MinValue(0)] decimal amount,
             [Summary(description: "Asset to swap from")] Assets.AllAssets from,
             [Summary(description: "Asset to swap to")] Assets.AllAssets to)
         {
@@ -92,7 +92,7 @@ namespace SwappyBot.Commands.Quote
                 return;
             }
             
-            var quoteReceive = double.Parse(quote.EgressAmount) / Math.Pow(10, assetTo.Decimals);
+            var quoteReceive = quote.EgressAmount;
             
             await ModifyOriginalResponseAsync(x =>
             {

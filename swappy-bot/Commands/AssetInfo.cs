@@ -9,9 +9,9 @@ namespace SwappyBot.Commands
         public string Name { get; }
         public string Network { get; }
         public int Decimals { get; }
-        public double MinimumAmount { get; }
-        public double MaximumAmount { get; }
-        public double[] SuggestedAmounts { get; }
+        public decimal MinimumAmount { get; }
+        public decimal MaximumAmount { get; }
+        public decimal[] SuggestedAmounts { get; }
         public string FormatString { get; }
         public Func<string, bool> AddressValidator { get; }
 
@@ -21,9 +21,9 @@ namespace SwappyBot.Commands
             string name, 
             string network, 
             int decimals,
-            double minimumAmount, 
-            double maximumAmount,
-            double[] suggestedAmounts,
+            decimal minimumAmount, 
+            decimal maximumAmount,
+            decimal[] suggestedAmounts,
             Func<string, bool> addressValidator)
         {
             Id = id;

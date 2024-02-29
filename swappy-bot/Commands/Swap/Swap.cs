@@ -300,7 +300,7 @@ namespace SwappyBot.Commands.Swap
                     assetFrom,
                     false));
 
-            if (!double.TryParse(amountText, out var amount))
+            if (!decimal.TryParse(amountText, out var amount))
             {
                 // Amount is not a number
                 var amountButtons = BuildAmountButtons(
@@ -373,8 +373,8 @@ namespace SwappyBot.Commands.Swap
             }
             
             var quoteTime = DateTimeOffset.UtcNow;
-            var quoteDeposit = double.Parse(quote.IngressAmount) / Math.Pow(10, assetFrom.Decimals);
-            var quoteReceive = double.Parse(quote.EgressAmount) / Math.Pow(10, assetTo.Decimals);
+            var quoteDeposit = quote.IngressAmount;
+            var quoteReceive = quote.EgressAmount;
             var quoteRate =
                 $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
             // var quotePlatformFee = 0.01;
@@ -539,8 +539,8 @@ namespace SwappyBot.Commands.Swap
                 }
 
                 var quoteTime = DateTimeOffset.UtcNow;
-                var quoteDeposit = double.Parse(quote.IngressAmount) / Math.Pow(10, assetFrom.Decimals);
-                var quoteReceive = double.Parse(quote.EgressAmount) / Math.Pow(10, assetTo.Decimals);
+                var quoteDeposit = quote.IngressAmount;
+                var quoteReceive = quote.EgressAmount;
                 var quoteRate =
                     $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
                 // var quotePlatformFee = 0.01;
@@ -758,8 +758,8 @@ namespace SwappyBot.Commands.Swap
         }
 
         private async Task NotifySwap(
-            double amountFrom,
-            double amountTo,
+            decimal amountFrom,
+            decimal amountTo,
             AssetInfo assetFrom,
             AssetInfo assetTo)
         {

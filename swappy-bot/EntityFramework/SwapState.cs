@@ -13,16 +13,16 @@ namespace SwappyBot.EntityFramework
         
         public string? AssetFrom { get; set;  }
         public string? AssetTo { get; set;  }
-        public double? Amount { get; set;  }
+        public decimal? Amount { get; set;  }
         public string? DestinationAddress { get; set; }
         
         public DateTimeOffset? QuoteTime { get; set; }
         
-        public double? QuoteDeposit { get; set; }
-        public double? QuoteReceive { get; set; }
+        public decimal? QuoteDeposit { get; set; }
+        public decimal? QuoteReceive { get; set; }
         public string? QuoteRate { get; set; }
-        public double? QuotePlatformFee { get; set; }
-        public double? QuoteChainflipFee { get; set; }
+        public decimal? QuotePlatformFee { get; set; }
+        public decimal? QuoteChainflipFee { get; set; }
         
         public DateTimeOffset? SwapAccepted { get; set; }
         public DateTimeOffset? SwapCancelled { get; set; }

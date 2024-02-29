@@ -1,7 +1,5 @@
 namespace SwappyBot.Commands
 {
-    using System;
-    using System.Globalization;
     using System.Net.Http;
     using System.Net.Http.Json;
     using System.Text.Json.Serialization;
@@ -15,7 +13,7 @@ namespace SwappyBot.Commands
             ILogger logger,
             BotConfiguration configuration,
             IHttpClientFactory httpClientFactory,
-            double amount,
+            decimal amount,
             AssetInfo assetFrom,
             AssetInfo assetTo)
         {
@@ -31,14 +29,7 @@ namespace SwappyBot.Commands
             var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)
-            {
-                var quote = await quoteResponse.Content.ReadFromJsonAsync<QuoteResponse>();
-                
-                var convertedAmount = amount * Math.Pow(10, assetFrom.Decimals);
-                quote.IngressAmount = convertedAmount.ToString(CultureInfo.InvariantCulture);
-                
-                return quote;
-            }
+                return await quoteResponse.Content.ReadFromJsonAsync<QuoteResponse>();
 
             logger.LogError(
                 "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
@@ -52,28 +43,10 @@ namespace SwappyBot.Commands
 
     public class QuoteResponse
     {
-        [JsonIgnore]
-        public string IngressAmount { get; set; }
+        [JsonPropertyName("ingressAmount")]
+        public decimal IngressAmount { get; set; }
         
         [JsonPropertyName("egressAmount")]
-        public string EgressAmount { get; set; }
-
-        [JsonPropertyName("includedFees")]
-        public QuoteFees[] Fees { get; set; }
-    }
-
-    public class QuoteFees
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-        
-        [JsonPropertyName("chain")]
-        public string Chain { get; set; }
-        
-        [JsonPropertyName("asset")]
-        public string Asset { get; set; }
-        
-        [JsonPropertyName("amount")]
-        public string Amount { get; set; }
+        public decimal EgressAmount { get; set; }
     }
 }
