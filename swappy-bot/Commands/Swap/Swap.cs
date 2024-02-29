@@ -106,7 +106,7 @@ namespace SwappyBot.Commands.Swap
                     await ModifyOriginalResponseAsync(x =>
                     {
                         x.Content =
-                            $"💩 Hi! I've tried creating a new **private thread** with you but received an error: {e.InnerException.Message}.You can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.";
+                            $"💩 Hi! I've tried creating a new **private thread** with you but received an error: **{e.InnerException.Message}**. You can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.";
                         x.Flags = MessageFlags.SuppressEmbeds;
                     });
                 }
@@ -115,7 +115,7 @@ namespace SwappyBot.Commands.Swap
                     await ModifyOriginalResponseAsync(x =>
                     {
                         x.Content =
-                            $"💩 Hi! I've tried creating a new **private thread** with you but received an error: {e.Message}.You can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.";
+                            $"💩 Hi! I've tried creating a new **private thread** with you but received an error: **{e.Message}**. You can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.";
                         x.Flags = MessageFlags.SuppressEmbeds;
                     });
                 }
