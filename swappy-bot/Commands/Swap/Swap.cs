@@ -686,8 +686,6 @@ namespace SwappyBot.Commands.Swap
             DepositAddressResponse? deposit;
             try
             {
-                swapState.SwapAccepted = DateTimeOffset.UtcNow;
-
                 deposit = await DepositAddressProvider.GetDepositAddressAsync(
                     _logger,
                     _configuration,
@@ -704,14 +702,14 @@ namespace SwappyBot.Commands.Swap
                     "[{StateId}] Generated deposit address {DepositAddress}",
                     stateId,
                     deposit.Address);
-
+                
+                swapState.SwapAccepted = DateTimeOffset.UtcNow;
                 swapState.DepositAddress = deposit.Address;
                 swapState.DepositChannel = $"{deposit.IssuedBlock}-{deposit.Network}-{deposit.ChannelId}";
                 swapState.DepositGenerated = DateTimeOffset.UtcNow;
 
                 await _dbContext.SaveChangesAsync();
 
-                typing.Dispose();
             }
             catch (Exception e)
             {
@@ -719,14 +717,14 @@ namespace SwappyBot.Commands.Swap
                     e,
                     "[{StateId}] Something went wrong asking a deposit address",
                     stateId);
-                
+
                 var swapButtons = BuildSwapButtons(
-                    "swap-step6", 
+                    "swap-step6",
                     stateId,
                     enabled: true,
-                    addDisclaimer: true,
+                    addDisclaimer: false,
                     fromDisclaimer: false);
-                
+
                 await Context.Channel.SendMessageAsync(
                     "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.",
                     components: swapButtons,
@@ -734,7 +732,11 @@ namespace SwappyBot.Commands.Swap
 
                 return;
             }
-            
+            finally
+            {
+                typing.Dispose();
+            }
+
             await Context.Channel.SendMessageAsync(
                 "✅ Chainflip has generated a **Deposit Address** for your swap, please review the following information carefully:\n" +
                 "\n" +
