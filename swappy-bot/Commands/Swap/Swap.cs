@@ -679,38 +679,62 @@ namespace SwappyBot.Commands.Swap
             var typing = Context.Channel.EnterTypingState();
 
             var swapState = await _dbContext.SwapState.FindAsync(stateId);
-
+            
             var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
             var assetTo = Assets.SupportedAssets[swapState.AssetTo];
 
-            swapState.SwapAccepted = DateTimeOffset.UtcNow;
+            DepositAddressResponse? deposit;
+            try
+            {
+                swapState.SwapAccepted = DateTimeOffset.UtcNow;
 
-            var deposit = await DepositAddressProvider.GetDepositAddressAsync(
-                _logger,
-                _configuration,
-                _httpClientFactory,
-                swapState.Amount.Value,
-                assetFrom,
-                assetTo,
-                swapState.DestinationAddress);
+                deposit = await DepositAddressProvider.GetDepositAddressAsync(
+                    _logger,
+                    _configuration,
+                    _httpClientFactory,
+                    swapState.Amount.Value,
+                    assetFrom,
+                    assetTo,
+                    swapState.DestinationAddress);
 
-            var depositAddress = deposit.Address;
-            var depositBlock = deposit.IssuedBlock;
-            var depositChannel = deposit.ChannelId;
+                if (deposit == null)
+                    throw new Exception("Failed generating deposit address.");
+                
+                _logger.LogInformation(
+                    "[{StateId}] Generated deposit address {DepositAddress}",
+                    stateId,
+                    deposit.Address);
 
-            _logger.LogInformation(
-                "[{StateId}] Generated deposit address {DepositAddress}",
-                stateId,
-                deposit.Address);
+                swapState.DepositAddress = deposit.Address;
+                swapState.DepositChannel = $"{deposit.IssuedBlock}-{deposit.Network}-{deposit.ChannelId}";
+                swapState.DepositGenerated = DateTimeOffset.UtcNow;
 
-            swapState.DepositAddress = depositAddress;
-            swapState.DepositChannel = $"{depositBlock}-{deposit.Network}-{depositChannel}";
-            swapState.DepositGenerated = DateTimeOffset.UtcNow;
+                await _dbContext.SaveChangesAsync();
 
-            await _dbContext.SaveChangesAsync();
+                typing.Dispose();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    e,
+                    "[{StateId}] Something went wrong asking a deposit address",
+                    stateId);
+                
+                var swapButtons = BuildSwapButtons(
+                    "swap-step6", 
+                    stateId,
+                    enabled: true,
+                    addDisclaimer: true,
+                    fromDisclaimer: false);
+                
+                await Context.Channel.SendMessageAsync(
+                    "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.",
+                    components: swapButtons,
+                    flags: MessageFlags.SuppressEmbeds);
 
-            typing.Dispose();
-
+                return;
+            }
+            
             await Context.Channel.SendMessageAsync(
                 "✅ Chainflip has generated a **Deposit Address** for your swap, please review the following information carefully:\n" +
                 "\n" +
@@ -728,7 +752,7 @@ namespace SwappyBot.Commands.Swap
                 $"Receive: **{swapState.QuoteReceive} {assetTo.Ticker}**\n" +
                 $"Destination Address: **{swapState.DestinationAddress}**\n" +
                 $"\n" +
-                $"📩 **Deposit Address**: **`{depositAddress}`**\n" +
+                $"📩 **Deposit Address**: **`{deposit.Address}`**\n" +
                 $"\n" +
                 $"⚠️ Send **exactly {swapState.Amount} {assetFrom.Ticker}** on the **{deposit.Network}** network.\n" +
                 $"\n" +
@@ -742,14 +766,14 @@ namespace SwappyBot.Commands.Swap
                 $"📱 PS: For mobile phone usage, I am sending the **Deposit Address** separately for easier copying:");
 
             await Context.Channel.SendMessageAsync(
-                $"**`{depositAddress}`**");
+                $"**`{deposit.Address}`**");
             
             _logger.LogInformation(
                 "[{StateId}] Provided the deposit instructions to {DepositAddress} -> {ChainflipLink}",
                 stateId,
-                depositAddress,
+                deposit.Address,
                 deposit.ExplorerUrl);
-
+                
             var threadChannel = (IThreadChannel)Context.Channel;
 
             await threadChannel.ModifyAsync(x =>
@@ -778,7 +802,7 @@ namespace SwappyBot.Commands.Swap
                 swapState.QuoteReceive,
                 assetTo.Ticker,
                 swapState.DestinationAddress,
-                depositAddress);
+                deposit.Address);
         }
 
         private async Task NotifySwap(
