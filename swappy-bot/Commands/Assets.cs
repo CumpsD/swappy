@@ -27,7 +27,7 @@ namespace SwappyBot.Commands
                     "Bitcoin",
                     8,
                     0.0007m,
-                    [0.002m, 0.005m, 0.01m, 0.02m, 0.05m, 0.1m, 0.2m, 0.5m, 1.0m],
+                    [0.005m, 0.01m, 0.02m, 0.05m, 0.1m, 0.2m, 0.5m, 1.0m, 2.0m],
                     BitcoinAddressValidator.IsValidAddress)
             },
 
