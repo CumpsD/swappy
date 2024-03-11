@@ -10,7 +10,6 @@ namespace SwappyBot.Commands
         public string Network { get; }
         public int Decimals { get; }
         public decimal MinimumAmount { get; }
-        public decimal MaximumAmount { get; }
         public decimal[] SuggestedAmounts { get; }
         public string FormatString { get; }
         public Func<string, bool> AddressValidator { get; }
@@ -22,7 +21,6 @@ namespace SwappyBot.Commands
             string network, 
             int decimals,
             decimal minimumAmount, 
-            decimal maximumAmount,
             decimal[] suggestedAmounts,
             Func<string, bool> addressValidator)
         {
@@ -32,7 +30,6 @@ namespace SwappyBot.Commands
             Network = network;
             Decimals = decimals;
             MinimumAmount = minimumAmount;
-            MaximumAmount = maximumAmount;
             SuggestedAmounts = suggestedAmounts;
             AddressValidator = addressValidator;
             

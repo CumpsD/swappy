@@ -260,13 +260,7 @@ namespace SwappyBot.Commands.Swap
                 assetFrom);
 
             await Context.Channel.SendMessageAsync(
-                $"You've chosen to swap **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**. It's time to select the **amount** of **{assetFrom.Name} ({assetFrom.Ticker})** you want to swap.\n" +
-                $"\n" +
-                $"The following restrictions are currently in place:\n" +
-                $"Minimum amount: **{assetFrom.MinimumAmount} {assetFrom.Ticker}**\n" +
-                $"Maximum amount: **{assetFrom.MaximumAmount} {assetFrom.Ticker}**\n" +
-                $"\n" +
-                $"⚠️️ **Any funds sent outside of this range will be unrecoverable!** ⚠️",
+                $"You've chosen to swap **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**. It's time to select the **amount** of **{assetFrom.Name} ({assetFrom.Ticker})** you want to swap.",
                 components: amount);
 
             _logger.LogInformation(
@@ -343,7 +337,7 @@ namespace SwappyBot.Commands.Swap
                 return;
             }
 
-            if (amount < assetFrom.MinimumAmount || amount > assetFrom.MaximumAmount)
+            if (amount < assetFrom.MinimumAmount)
             {
                 // Amount is outside of valid ranges
                 var amountButtons = BuildAmountButtons(
@@ -351,11 +345,11 @@ namespace SwappyBot.Commands.Swap
                     assetFrom);
 
                 await Context.Channel.SendMessageAsync(
-                    "❌ The amount you specified is outside of the current restrictions, please try again.",
+                    $"❌ The amount you specified is below the minimum amount ({assetFrom.MinimumAmount} {assetFrom.Ticker}).",
                     components: amountButtons);
 
                 _logger.LogInformation(
-                    "[{StateId}] Amount ({Amount}) is outside of the restrictions",
+                    "[{StateId}] Amount ({Amount}) is below the minimum amount",
                     stateId,
                     amountText);
 
@@ -744,10 +738,6 @@ namespace SwappyBot.Commands.Swap
                 $"* Send **{swapState.Amount} {assetFrom.Ticker}** within 1 hour, delays may result in a different rate.\n" +
                 $"* Funds sent to an expired Deposit Address are **unrecoverable**.\n" +
                 $"* Funds exceeding **{swapState.Amount} {assetFrom.Ticker}** are processed at current market rates.\n" +
-                $"\n" +
-                $"⚠️ Minimum amount: **{assetFrom.MinimumAmount} {assetFrom.Ticker}**\n" +
-                $"⚠️ Maximum amount: **{assetFrom.MaximumAmount} {assetFrom.Ticker}**\n" +
-                $"⚠️ Any funds sent outside of this range will be lost!\n" +
                 $"\n" +
                 $"Swapping **{assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**\n" +
                 $"Deposit: **{swapState.Amount} {assetFrom.Ticker}**\n" +

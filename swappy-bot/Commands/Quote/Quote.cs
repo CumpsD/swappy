@@ -55,11 +55,11 @@ namespace SwappyBot.Commands.Quote
                 return;
             }
 
-            if (amount < assetFrom.MinimumAmount || amount > assetFrom.MaximumAmount)
+            if (amount < assetFrom.MinimumAmount)
             {
                 await ModifyOriginalResponseAsync(x =>
                     x.Content =
-                        $"**{amount} {assetFrom.Ticker}** is outside the range for **{assetFrom.Name}**, it needs to be between **{assetFrom.MinimumAmount} {assetFrom.Ticker}** and **{assetFrom.MaximumAmount} {assetFrom.Ticker}** for now.");
+                        $"**{amount} {assetFrom.Ticker}** is below the minimum amount for **{assetFrom.Name}**, it needs to be greater than **{assetFrom.MinimumAmount} {assetFrom.Ticker}**.");
 
                 return;
             }
