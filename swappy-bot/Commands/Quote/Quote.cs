@@ -87,8 +87,9 @@ namespace SwappyBot.Commands.Quote
                 {
                     x.Flags = MessageFlags.SuppressEmbeds;
                     x.Content =
-                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.\n" +
-                        string.Join(", ", quoteResult.Errors.Select(e => e.Message));
+                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support. (**" +
+                        string.Join(", ", quoteResult.Errors.Select(e => e.Message)) +
+                        "**)";
                 });
                 
                 return;

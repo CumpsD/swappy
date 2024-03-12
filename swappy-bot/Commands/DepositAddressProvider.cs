@@ -42,17 +42,13 @@ namespace SwappyBot.Commands
                     swapRequest);
 
                 var swap = JsonSerializer.Deserialize<DepositAddressResponse>(body);
-                if (swap != null) 
-                    return Result.Ok(swap);
-                
-                var problem = JsonSerializer.Deserialize<ProblemDetailsResponse>(body);
-                return Result.Fail(
-                    problem == null 
-                        ? "Something has gone wrong while starting a swap."
-                        : problem.Detail);
+                return swap == null
+                    ? Result.Fail("Something has gone wrong while starting a swap.")
+                    : Result.Ok(swap);
             }
 
             var error = await swapResponse.Content.ReadAsStringAsync();
+            var problem = JsonSerializer.Deserialize<ProblemDetailsResponse>(error);
 
             logger.LogError(
                 "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
@@ -60,7 +56,10 @@ namespace SwappyBot.Commands
                 error,
                 swapRequest);
 
-            return Result.Fail(error);
+            return Result.Fail(
+                problem == null 
+                    ? "Something has gone wrong while starting a swap."
+                    : problem.Detail);
         }
     }
     

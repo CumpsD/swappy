@@ -40,25 +40,24 @@ namespace SwappyBot.Commands
                     quoteRequest);
 
                 var quote = JsonSerializer.Deserialize<QuoteResponse>(body);
-                if (quote != null) 
-                    return Result.Ok(quote);
-                
-                var problem = JsonSerializer.Deserialize<ProblemDetailsResponse>(body);
-                return Result.Fail(
-                    problem == null 
-                        ? "Something has gone wrong while fetching a quote." 
-                        : problem.Detail);
+                return quote == null
+                    ? Result.Fail("Something has gone wrong while fetching a quote.")
+                    : Result.Ok(quote);
             }
 
             var error = await quoteResponse.Content.ReadAsStringAsync();
-
+            var problem = JsonSerializer.Deserialize<ProblemDetailsResponse>(error);
+            
             logger.LogError(
                 "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
                 quoteResponse.StatusCode,
                 error,
                 quoteRequest);
 
-            return Result.Fail(error);
+            return Result.Fail(
+                problem == null 
+                    ? "Something has gone wrong while fetching a quote." 
+                    : problem.Detail);
         }
     }
 
