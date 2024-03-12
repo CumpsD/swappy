@@ -7,6 +7,7 @@ namespace SwappyBot.Commands.Swap
     using Discord;
     using Discord.Interactions;
     using Discord.WebSocket;
+    using FluentResults;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using SwappyBot.Configuration;
@@ -367,7 +368,7 @@ namespace SwappyBot.Commands.Swap
                 assetFrom.Ticker,
                 assetTo.Ticker);
 
-            var quote = await QuoteProvider.GetQuoteAsync(
+            var quoteResult = await QuoteProvider.GetQuoteAsync(
                 _logger,
                 _configuration,
                 _httpClientFactory,
@@ -375,7 +376,7 @@ namespace SwappyBot.Commands.Swap
                 assetFrom,
                 assetTo);
 
-            if (quote == null)
+            if (quoteResult.IsFailed)
             {
                 // Send support message, and allow a retry
                 var amountButtons = BuildAmountButtons(
@@ -383,12 +384,15 @@ namespace SwappyBot.Commands.Swap
                     assetFrom);
                 
                 await Context.Channel.SendMessageAsync(
-                    "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.",
+                    "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.\n" +
+                    string.Join(", ", quoteResult.Errors.Select(e => e.Message)),
                     components: amountButtons,
                     flags: MessageFlags.SuppressEmbeds);
                 
                 return;
             }
+
+            var quote = quoteResult.Value;
             
             var quoteTime = DateTimeOffset.UtcNow;
             var quoteDeposit = quote.IngressAmount;
@@ -534,7 +538,7 @@ namespace SwappyBot.Commands.Swap
                     assetFrom.Ticker,
                     assetTo.Ticker);
 
-                var quote = await QuoteProvider.GetQuoteAsync(
+                var quoteResult = await QuoteProvider.GetQuoteAsync(
                     _logger,
                     _configuration,
                     _httpClientFactory,
@@ -542,19 +546,22 @@ namespace SwappyBot.Commands.Swap
                     assetFrom,
                     assetTo);
 
-                if (quote == null)
+                if (quoteResult.IsFailed)
                 {
                     var addressButton = BuildAddressButton(
                         $"swap-step5-{stateId}",
                         assetTo);
                     
                     await Context.Channel.SendMessageAsync(
-                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.",
+                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.\n" +
+                        string.Join(", ", quoteResult.Errors.Select(e => e.Message)),
                         components: addressButton,
                         flags: MessageFlags.SuppressEmbeds);
 
                     return;
                 }
+
+                var quote = quoteResult.Value;
 
                 var quoteTime = DateTimeOffset.UtcNow;
                 var quoteDeposit = quote.IngressAmount;
@@ -677,10 +684,10 @@ namespace SwappyBot.Commands.Swap
             var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
             var assetTo = Assets.SupportedAssets[swapState.AssetTo];
 
-            DepositAddressResponse? deposit;
+            DepositAddressResponse deposit;
             try
             {
-                deposit = await DepositAddressProvider.GetDepositAddressAsync(
+                var depositResult = await DepositAddressProvider.GetDepositAddressAsync(
                     _logger,
                     _configuration,
                     _httpClientFactory,
@@ -689,8 +696,10 @@ namespace SwappyBot.Commands.Swap
                     assetTo,
                     swapState.DestinationAddress);
 
-                if (deposit == null)
+                if (depositResult.IsFailed)
                     throw new Exception("Failed generating deposit address.");
+
+                deposit = depositResult.Value;
                 
                 _logger.LogInformation(
                     "[{StateId}] Generated deposit address {DepositAddress}",
@@ -703,7 +712,6 @@ namespace SwappyBot.Commands.Swap
                 swapState.DepositGenerated = DateTimeOffset.UtcNow;
 
                 await _dbContext.SaveChangesAsync();
-
             }
             catch (Exception e)
             {

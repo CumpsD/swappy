@@ -1,15 +1,16 @@
 namespace SwappyBot.Commands
 {
     using System.Net.Http;
-    using System.Net.Http.Json;
+    using System.Text.Json;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
+    using FluentResults;
     using Microsoft.Extensions.Logging;
     using SwappyBot.Configuration;
 
     public static class QuoteProvider
     {
-        public static async Task<QuoteResponse?> GetQuoteAsync(
+        public static async Task<Result<QuoteResponse>> GetQuoteAsync(
             ILogger logger,
             BotConfiguration configuration,
             IHttpClientFactory httpClientFactory,
@@ -29,15 +30,35 @@ namespace SwappyBot.Commands
             var quoteResponse = await client.GetAsync(quoteRequest);
 
             if (quoteResponse.IsSuccessStatusCode)
-                return await quoteResponse.Content.ReadFromJsonAsync<QuoteResponse>();
+            {
+                var body = await quoteResponse.Content.ReadAsStringAsync();
+
+                logger.LogInformation(
+                    "Broker API returned {StatusCode}: {Body}\nRequest: {QuoteRequest}",
+                    quoteResponse.StatusCode,
+                    body,
+                    quoteRequest);
+
+                var quote = JsonSerializer.Deserialize<QuoteResponse>(body);
+                if (quote != null) 
+                    return Result.Ok(quote);
+                
+                var problem = JsonSerializer.Deserialize<ProblemDetailsResponse>(body);
+                return Result.Fail(
+                    problem == null 
+                        ? "Something has gone wrong while fetching a quote." 
+                        : problem.Detail);
+            }
+
+            var error = await quoteResponse.Content.ReadAsStringAsync();
 
             logger.LogError(
                 "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
                 quoteResponse.StatusCode,
-                await quoteResponse.Content.ReadAsStringAsync(),
+                error,
                 quoteRequest);
 
-            return null;
+            return Result.Fail(error);
         }
     }
 
@@ -48,5 +69,11 @@ namespace SwappyBot.Commands
         
         [JsonPropertyName("egressAmount")]
         public decimal EgressAmount { get; set; }
+    }
+
+    public class ProblemDetailsResponse
+    {
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
     }
 }

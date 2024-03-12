@@ -1,6 +1,7 @@
 namespace SwappyBot.Commands.Quote
 {
     using System;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Discord;
@@ -71,7 +72,7 @@ namespace SwappyBot.Commands.Quote
                 assetFrom.Ticker,
                 assetTo.Ticker);
             
-            var quote = await QuoteProvider.GetQuoteAsync(
+            var quoteResult = await QuoteProvider.GetQuoteAsync(
                 _logger,
                 _configuration,
                 _httpClientFactory,
@@ -79,19 +80,22 @@ namespace SwappyBot.Commands.Quote
                 assetFrom,
                 assetTo);
             
-            if (quote == null)
+            if (quoteResult.IsFailed)
             {
                 // Send support message
                 await ModifyOriginalResponseAsync(x =>
                 {
                     x.Flags = MessageFlags.SuppressEmbeds;
                     x.Content =
-                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.";
+                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.\n" +
+                        string.Join(", ", quoteResult.Errors.Select(e => e.Message));
                 });
                 
                 return;
             }
             
+            var quote = quoteResult.Value;
+
             var quoteReceive = quote.EgressAmount;
             
             await ModifyOriginalResponseAsync(x =>

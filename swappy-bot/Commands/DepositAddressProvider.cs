@@ -1,15 +1,16 @@
 namespace SwappyBot.Commands
 {
     using System.Net.Http;
-    using System.Net.Http.Json;
+    using System.Text.Json;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
+    using FluentResults;
     using Microsoft.Extensions.Logging;
     using SwappyBot.Configuration;
 
     public static class DepositAddressProvider
     {
-        public static async Task<DepositAddressResponse?> GetDepositAddressAsync(
+        public static async Task<Result<DepositAddressResponse>> GetDepositAddressAsync(
             ILogger logger,
             BotConfiguration configuration,
             IHttpClientFactory httpClientFactory,
@@ -31,15 +32,35 @@ namespace SwappyBot.Commands
             var swapResponse = await client.GetAsync(swapRequest);
             
             if (swapResponse.IsSuccessStatusCode)
-                return await swapResponse.Content.ReadFromJsonAsync<DepositAddressResponse>();
+            {
+                var body = await swapResponse.Content.ReadAsStringAsync();
+
+                logger.LogInformation(
+                    "Broker API returned {StatusCode}: {Body}\nRequest: {SwapRequest}",
+                    swapResponse.StatusCode,
+                    body,
+                    swapRequest);
+
+                var swap = JsonSerializer.Deserialize<DepositAddressResponse>(body);
+                if (swap != null) 
+                    return Result.Ok(swap);
+                
+                var problem = JsonSerializer.Deserialize<ProblemDetailsResponse>(body);
+                return Result.Fail(
+                    problem == null 
+                        ? "Something has gone wrong while starting a swap."
+                        : problem.Detail);
+            }
+
+            var error = await swapResponse.Content.ReadAsStringAsync();
 
             logger.LogError(
                 "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
                 swapResponse.StatusCode,
-                await swapResponse.Content.ReadAsStringAsync(),
+                error,
                 swapRequest);
 
-            return null;
+            return Result.Fail(error);
         }
     }
     
