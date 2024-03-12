@@ -385,7 +385,7 @@ namespace SwappyBot.Commands.Swap
                 
                 await Context.Channel.SendMessageAsync(
                     "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support. (**" +
-                    string.Join(", ", quoteResult.Errors.Select(e => e.Message)) +
+                    quoteResult.BuildError() + 
                     "**)",
                     components: amountButtons,
                     flags: MessageFlags.SuppressEmbeds);
@@ -555,7 +555,7 @@ namespace SwappyBot.Commands.Swap
                     
                     await Context.Channel.SendMessageAsync(
                         "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support. (**" +
-                        string.Join(", ", quoteResult.Errors.Select(e => e.Message)) + 
+                        quoteResult.BuildError() + 
                         "**)",
                         components: addressButton,
                         flags: MessageFlags.SuppressEmbeds);
