@@ -32,7 +32,10 @@ namespace SwappyBot.EntityFramework
         public string? DepositChannel { get; set; }
         
         public string? SwapStatus { get; set; }
+
+        public string? AnnouncementIds { get; set; }
         
+        public bool? Replied { get; set; }
     }
     #pragma warning restore CS8618
 
@@ -78,6 +81,9 @@ namespace SwappyBot.EntityFramework
             builder.Property(x => x.DepositChannel).IsRequired(false).HasMaxLength(50);
             
             builder.Property(x => x.SwapStatus).IsRequired(false).HasMaxLength(10000);
+            
+            builder.Property(x => x.AnnouncementIds).IsRequired(false).HasMaxLength(1000);
+            builder.Property(x => x.Replied).IsRequired(false);
         }
     }
 }

@@ -1,13 +1,13 @@
 namespace SwappyBot.Commands.Swap
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Discord;
     using Discord.Interactions;
     using Discord.WebSocket;
-    using FluentResults;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using SwappyBot.Configuration;
@@ -790,11 +790,26 @@ namespace SwappyBot.Commands.Swap
                 "[{StateId}] Locked thread",
                 stateId);
 
-            await NotifySwap(
+            var messageIds = await NotifySwap(
                 swapState.Amount.Value,
                 swapState.QuoteReceive.Value,
                 assetFrom,
                 assetTo);
+
+            try
+            {
+                swapState.AnnouncementIds = string.Join("|", messageIds);
+                swapState.Replied = false;
+                
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    e,
+                    "[{StateId}] Something went wrong saving the message ids",
+                    stateId);
+            }
 
             _logger.LogInformation(
                 "[{StateId}] Announced new swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress}",
@@ -807,23 +822,29 @@ namespace SwappyBot.Commands.Swap
                 deposit.Address);
         }
 
-        private async Task NotifySwap(
+        private async Task<ulong[]> NotifySwap(
             decimal amountFrom,
             decimal amountTo,
             AssetInfo assetFrom,
             AssetInfo assetTo)
         {
+            var messageIds = new List<ulong>();
+            
             foreach (var notificationChannelId in _configuration.NotificationChannelIds)
             {
                 var notificationChannel =
                     (ITextChannel)Context.Client.GetChannel(notificationChannelId);
             
-                await notificationChannel.SendMessageAsync(
+                var messageId = await notificationChannel.SendMessageAsync(
                     $"I have just started a swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
                     $"Use `/swap` to use my services as well. 😎");
 
+                messageIds.Add(messageId.Id);
+                
                 await Task.Delay(2000);
             }
+
+            return messageIds.ToArray();
         }
 
         [ComponentInteraction("swap-step6-nok-*-*")]
