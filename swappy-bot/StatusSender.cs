@@ -88,8 +88,11 @@ namespace SwappyBot
                     await ProcessSwaps(swaps);
                 }
             }
-            catch (OperationCanceledException)
+            catch (Exception e)
             {
+                _logger.LogError(
+                    e,
+                    "StatusSender had a problem");
             }
         }
 
@@ -111,7 +114,7 @@ namespace SwappyBot
                 var channelId = depositParts[2];
 
                 var statusRequest =
-                    $"status" +
+                    $"status-by-deposit-channel" +
                     $"?issuedBlock={issuedBlock}" +
                     $"&network={network}" +
                     $"&channelId={channelId}" +
