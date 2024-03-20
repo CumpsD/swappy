@@ -183,7 +183,7 @@ namespace SwappyBot
             var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
             var assetTo = Assets.SupportedAssets[swapState.AssetTo];
             var amountFrom = decimal.Parse(status.DepositAmount) / Convert.ToDecimal(Math.Pow(10, assetFrom.Decimals));
-            var amountTo = decimal.Parse(status.DepositAmount) / Convert.ToDecimal(Math.Pow(10, assetTo.Decimals));
+            var amountTo = decimal.Parse(status.EgressAmount) / Convert.ToDecimal(Math.Pow(10, assetTo.Decimals));
             
             for (var i = 0; i < _configuration.NotificationChannelIds.Length; i++)
             {
@@ -193,7 +193,7 @@ namespace SwappyBot
                 await discordMessage.AddReactionAsync(_checkEmoji);
                 
                 await discordChannel.SendMessageAsync(
-                    $"A swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})** was just completed! 🎉 \n" +
+                    $"A swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})** was just **completed**! 🎉 \n" +
                     $"Use `/swap` to use my services as well. 😎",
                     messageReference: new MessageReference(discordMessage.Id, failIfNotExists: true));
                 
