@@ -74,12 +74,19 @@ namespace SwappyBot
                 await interactionService.RegisterCommandsGloballyAsync();
                 
                 _logger.LogInformation("Registered commands");
-                
+            };
+
+            client.Connected += () =>
+            {
+                _logger.LogInformation("Sending start signal to StatusSender");
                 _statusSender.Start();
+                
+                return Task.CompletedTask;
             };
 
             client.Disconnected += exception =>
             {
+                _logger.LogInformation("Sending stop signal to StatusSender");
                 _statusSender.Stop();
                 
                 if (exception is GatewayReconnectException)

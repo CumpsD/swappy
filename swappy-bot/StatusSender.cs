@@ -92,6 +92,7 @@ namespace SwappyBot
                     await ProcessSwaps(swaps);
                 }
             }
+            catch (OperationCanceledException) {}
             catch (Exception e)
             {
                 _logger.LogError(
