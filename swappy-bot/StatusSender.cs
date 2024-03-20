@@ -136,19 +136,19 @@ namespace SwappyBot
                         continue;
 
                     swap.SwapStatus = statusBody;
-                    var status = JsonSerializer.Deserialize<SwapStatus>(statusBody);
-                    var swapCompleted = string.Equals(status!.State, "COMPLETE", StringComparison.Ordinal);
+                    var status = JsonSerializer.Deserialize<SwapStatusResponse>(statusBody);
+                    var swapCompleted = string.Equals(status!.Status.State, "COMPLETE", StringComparison.Ordinal);
 
                     // If completed, reply and mark it as done
                     if (swapCompleted)
                     {
-                        await AnnounceSwapCompleted(swap, status);
+                        await AnnounceSwapCompleted(swap, status.Status);
                         swap.Replied = true;
                     }
                     else
                     {
                         // If not completed and expired, mark as done
-                        var swapExpired = status.DepositChannelExpired;
+                        var swapExpired = status.Status.DepositChannelExpired;
                         if (swapExpired)
                             swap.Replied = true;
                     }
@@ -201,8 +201,17 @@ namespace SwappyBot
             }
         }
     }
+
+    public class SwapStatusResponse
+    {
+        [JsonPropertyName("id")] 
+        public ulong Id { get; set; }
+
+        [JsonPropertyName("status")]
+        public SwapStatus Status { get; set; }
+    }
     
-    public class SwapStatus
+    public class SwapStatus 
     {
         [JsonPropertyName("state")]
         public string State { get; set; }
