@@ -197,6 +197,16 @@ namespace SwappyBot
                     $"Use `/swap` to use my services as well. 😎",
                     messageReference: new MessageReference(discordMessage.Id, failIfNotExists: true));
                 
+                _logger.LogInformation(
+                    "[{StateId}] Announced completed swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress}",
+                    swapState.StateId,
+                    amountFrom,
+                    assetFrom.Ticker,
+                    amountTo,
+                    assetTo.Ticker,
+                    swapState.DestinationAddress,
+                    swapState.DepositAddress);
+                
                 await Task.Delay(2000);
             }
         }
