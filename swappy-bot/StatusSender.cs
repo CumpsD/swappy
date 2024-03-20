@@ -80,6 +80,9 @@ namespace SwappyBot
                             x.AnnouncementIds != null &&
                             x.Replied != null && x.Replied.Value == false)
                         .ToListAsync();
+                    
+                    if (swaps.Count == 0)
+                        continue;
 
                     _logger.LogInformation(
                         "Processing {Count} swaps", 
