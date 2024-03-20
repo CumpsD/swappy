@@ -25,12 +25,12 @@ namespace SwappyBot
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly BotContext _dbContext;
 
+        private readonly Emoji _checkEmoji = new("✅");
+
         private readonly PeriodicTimer _timer;
         private readonly CancellationTokenSource _cts = new();
         private Task? _timerTask;
         
-        private Emoji _checkEmoji = new("✅");
-
         public StatusSender(
             ILogger<StatusSender> logger,
             IOptions<BotConfiguration> options,
@@ -182,8 +182,8 @@ namespace SwappyBot
 
             var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
             var assetTo = Assets.SupportedAssets[swapState.AssetTo];
-            var amountFrom = status.DepositAmount.Value / Convert.ToDecimal(Math.Pow(10, assetFrom.Decimals));
-            var amountTo = status.EgressAmount.Value / Convert.ToDecimal(Math.Pow(10, assetTo.Decimals));
+            var amountFrom = decimal.Parse(status.DepositAmount) / Convert.ToDecimal(Math.Pow(10, assetFrom.Decimals));
+            var amountTo = decimal.Parse(status.DepositAmount) / Convert.ToDecimal(Math.Pow(10, assetTo.Decimals));
             
             for (var i = 0; i < _configuration.NotificationChannelIds.Length; i++)
             {
@@ -220,9 +220,9 @@ namespace SwappyBot
         public bool DepositChannelExpired { get; set; }
         
         [JsonPropertyName("depositAmount")]
-        public decimal? DepositAmount { get; set; }
+        public string? DepositAmount { get; set; }
 
         [JsonPropertyName("egressAmount")]
-        public decimal? EgressAmount { get; set; }
+        public string? EgressAmount { get; set; }
     }
 }
