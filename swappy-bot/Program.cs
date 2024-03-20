@@ -158,6 +158,10 @@
                 .SingleInstance();
             
             builder
+                .RegisterType<StatusSender>()
+                .SingleInstance();
+            
+            builder
                 .Populate(services);
 
             return new AutofacServiceProvider(builder.Build());

@@ -33,7 +33,7 @@ namespace SwappyBot.Commands
             SuggestedAmounts = suggestedAmounts;
             AddressValidator = addressValidator;
             
-            FormatString = $"0.00{new string('#', decimals - 2)}";
+            FormatString = $"###,###,###,###,##0.00{new string('#', decimals - 2)}";
         }
     }
 }

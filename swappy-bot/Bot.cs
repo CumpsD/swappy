@@ -15,17 +15,20 @@ namespace SwappyBot
     public class Bot
     {
         private readonly ILogger<Bot> _logger;
+        private readonly StatusSender _statusSender;
         private readonly DiscordSocketClient _client;
         private readonly BotConfiguration _configuration;
 
         public Bot(
             ILogger<Bot> logger,
             IOptions<BotConfiguration> options,
+            StatusSender statusSender,
             DiscordSocketClient client,
             InteractionHandler interactionHandler,
             InteractionService interactionService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _statusSender = statusSender ?? throw new ArgumentNullException(nameof(statusSender));
             _configuration = options.Value ?? throw new ArgumentNullException(nameof(options));
 
             _client = InitializeClient(
@@ -39,7 +42,7 @@ namespace SwappyBot
         public async Task RunAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Running...");
-
+            
             await _client.LoginAsync(
                 TokenType.Bot,
                 _configuration.Token);
@@ -47,7 +50,7 @@ namespace SwappyBot
             await _client.StartAsync();
 
             cancellationToken.WaitHandle.WaitOne();
-
+            
             if (_client.ConnectionState != ConnectionState.Disconnected)
             {
                 await _client.LogoutAsync();
@@ -71,10 +74,14 @@ namespace SwappyBot
                 await interactionService.RegisterCommandsGloballyAsync();
                 
                 _logger.LogInformation("Registered commands");
+                
+                _statusSender.Start();
             };
 
             client.Disconnected += exception =>
             {
+                _statusSender.Stop();
+                
                 if (exception is GatewayReconnectException)
                 {
                     _logger.LogInformation(
