@@ -836,7 +836,7 @@ namespace SwappyBot.Commands.Swap
                     (ITextChannel)Context.Client.GetChannel(notificationChannelId);
             
                 var messageId = await notificationChannel.SendMessageAsync(
-                    $"I have just started a swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
+                    $"I have just **started** a swap from **{amountFrom.ToString(assetFrom.FormatString)} {assetFrom.Name} ({assetFrom.Ticker})** to **{amountTo.ToString(assetTo.FormatString)} {assetTo.Name} ({assetTo.Ticker})**! 🎉 \n" +
                     $"Use `/swap` to use my services as well. 😎");
 
                 messageIds.Add(messageId.Id);
