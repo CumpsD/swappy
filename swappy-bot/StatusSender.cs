@@ -28,7 +28,7 @@ namespace SwappyBot
         private readonly Emoji _checkEmoji = new("✅");
 
         private readonly PeriodicTimer _timer;
-        private readonly CancellationTokenSource _cts = new();
+        private CancellationTokenSource? _cts;
         private Task? _timerTask;
         
         public StatusSender(
@@ -46,21 +46,21 @@ namespace SwappyBot
             _timer = new PeriodicTimer(TimeSpan.FromSeconds(_configuration.StatusCheckIntervalInSeconds.Value));
         }
         
-        public void Start()
-        {
-            _timerTask = RunAsync();
-            _logger.LogInformation("Started StatusSender");
-        }
+        public void Start() => _timerTask = RunAsync();
 
         public async Task Stop()
         {
             if (_timerTask is null)
+                return;
+            
+            if (_cts is null)
                 return;
 
             _cts.Cancel();
             await _timerTask;
             _cts.Dispose();
 
+            _timerTask = null;
             _logger.LogInformation("Stopped StatusSender");
         }
 
@@ -68,10 +68,11 @@ namespace SwappyBot
         {
             try
             {
+                _logger.LogInformation("Started StatusSender");
+                _cts = new CancellationTokenSource();
+
                 while (await _timer.WaitForNextTickAsync(_cts.Token))
                 {
-                    _logger.LogInformation("Getting swaps which are not processed yet");
-                    
                     // Get swaps which are not replied to
                     var swaps = await _dbContext
                         .SwapState
