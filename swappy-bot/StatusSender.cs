@@ -4,8 +4,6 @@ namespace SwappyBot
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using Discord;
@@ -103,8 +101,6 @@ namespace SwappyBot
 
         private async Task ProcessSwaps(List<SwapState> swaps)
         {
-            using var client = _httpClientFactory.CreateClient("Broker");
-            
             // Get status for each swap
             foreach (var swap in swaps)
             {
@@ -112,63 +108,34 @@ namespace SwappyBot
                     "Processing swap {Reference}", 
                     swap.StateId);
                 
-                var depositParts = swap.DepositChannel!.Split('-');
+                var status = await StatusProvider.GetStatusAsync(
+                    _logger, 
+                    _configuration, 
+                    _httpClientFactory, 
+                    swap.DepositChannel!);
 
-                var issuedBlock = depositParts[0];
-                var network = depositParts[1];
-                var channelId = depositParts[2];
-
-                var statusRequest =
-                    $"status-by-deposit-channel" +
-                    $"?issuedBlock={issuedBlock}" +
-                    $"&network={network}" +
-                    $"&channelId={channelId}" +
-                    $"&apiKey={_configuration.BrokerApiKey}";
-                
-                var statusResponse = await client.GetAsync(statusRequest);
-                            
-                if (statusResponse.IsSuccessStatusCode)
+                if (!status.IsFailed)
                 {
-                    var statusBody = await statusResponse.Content.ReadAsStringAsync();
+                    swap.SwapStatus = status.Value.Body;
 
-                    _logger.LogInformation(
-                        "Broker API returned {StatusCode}: {Body}\nRequest: {QuoteRequest}",
-                        statusResponse.StatusCode,
-                        statusBody,
-                        statusRequest);
-
-                    if (string.IsNullOrWhiteSpace(statusBody))
-                        continue;
-
-                    swap.SwapStatus = statusBody;
-                    var status = JsonSerializer.Deserialize<SwapStatusResponse>(statusBody);
-                    var swapCompleted = string.Equals(status!.Status.State, "COMPLETE", StringComparison.Ordinal);
+                    var s = status!.Value;
+                    var swapCompleted = string.Equals(s.Status.State, "COMPLETE", StringComparison.Ordinal);
 
                     // If completed, reply and mark it as done
                     if (swapCompleted)
                     {
-                        await AnnounceSwapCompleted(swap, status.Status);
+                        await AnnounceSwapCompleted(swap, s.Status);
                         swap.Replied = true;
                     }
                     else
                     {
                         // If not completed and expired, mark as done
-                        var swapExpired = status.Status.DepositChannelExpired;
+                        var swapExpired = s.Status.DepositChannelExpired;
                         if (swapExpired)
                             swap.Replied = true;
                     }
 
                     await _dbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    var error = await statusResponse.Content.ReadAsStringAsync();
-            
-                    _logger.LogError(
-                        "Broker API returned {StatusCode}: {Error}\nRequest: {QuoteRequest}",
-                        statusResponse.StatusCode,
-                        error,
-                        statusRequest);
                 }
                 
                 await Task.Delay(2000);
@@ -215,29 +182,5 @@ namespace SwappyBot
                 swapState.DestinationAddress,
                 swapState.DepositAddress);
         }
-    }
-
-    public class SwapStatusResponse
-    {
-        [JsonPropertyName("id")] 
-        public ulong Id { get; set; }
-
-        [JsonPropertyName("status")]
-        public SwapStatus Status { get; set; }
-    }
-    
-    public class SwapStatus 
-    {
-        [JsonPropertyName("state")]
-        public string State { get; set; }
-        
-        [JsonPropertyName("isDepositChannelExpired")]
-        public bool DepositChannelExpired { get; set; }
-        
-        [JsonPropertyName("depositAmount")]
-        public string? DepositAmount { get; set; }
-
-        [JsonPropertyName("egressAmount")]
-        public string? EgressAmount { get; set; }
     }
 }

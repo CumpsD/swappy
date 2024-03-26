@@ -400,15 +400,11 @@ namespace SwappyBot.Commands.Swap
             var quoteReceive = quote.EgressAmount;
             var quoteRate =
                 $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
-            // var quotePlatformFee = 0.01;
-            // var quoteChainflipFee = 5.49;
 
             swapState.QuoteTime = quoteTime;
             swapState.QuoteDeposit = quoteDeposit;
             swapState.QuoteReceive = quoteReceive;
             swapState.QuoteRate = quoteRate;
-            // swapState.QuotePlatformFee = quotePlatformFee;
-            // swapState.QuoteChainflipFee = quoteChainflipFee;
 
             await Context.Channel.SendMessageAsync(
                 $"You've chosen to swap **{amountText} {assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**.\n" +
@@ -570,15 +566,11 @@ namespace SwappyBot.Commands.Swap
                 var quoteReceive = quote.EgressAmount;
                 var quoteRate =
                     $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
-                // var quotePlatformFee = 0.01;
-                // var quoteChainflipFee = 5.49;
 
                 swapState.QuoteTime = quoteTime;
                 swapState.QuoteDeposit = quoteDeposit;
                 swapState.QuoteReceive = quoteReceive;
                 swapState.QuoteRate = quoteRate;
-                // swapState.QuotePlatformFee = quotePlatformFee;
-                // swapState.QuoteChainflipFee = quoteChainflipFee;
             }
 
             swapState.DestinationAddress = address;
@@ -595,9 +587,6 @@ namespace SwappyBot.Commands.Swap
                 $"\n" +
                 $"Deposit: **{swapState.Amount} {assetFrom.Ticker}**\n" +
                 $"Receive: **{swapState.QuoteReceive} {assetTo.Ticker}**\n" +
-                // $"Estimated Rate: **{quoteRate}**\n" +
-                // $"Estimated Platform Fee: **${quotePlatformFee}**\n" +
-                // $"Estimated Protocol & Gas Fee: **${quoteChainflipFee}**\n" +
                 $"\n" +
                 $"Destination Address: **{swapState.DestinationAddress}**\n" +
                 $"Quote Date: **{swapState.QuoteTime:yyyy-MM-dd HH:mm:ss}**\n" +
