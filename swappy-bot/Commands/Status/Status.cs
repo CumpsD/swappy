@@ -242,7 +242,7 @@ namespace SwappyBot.Commands.Status
                     $"🪙 Your swap has been **received in the destination wallet**, you can view it on **[Chainflip's official website]({url})**.";
             }
 
-            if (string.IsNullOrWhiteSpace(message))
+            if (!string.IsNullOrWhiteSpace(message))
             {
                 await ModifyOriginalResponseAsync(x =>
                 {
