@@ -174,54 +174,55 @@ namespace SwappyBot.Commands.Status
             {
                 // the transaction has been confirmed beyond our safety margin
                 message =
-                    $"🎉 Your swap is **completed** and has been **received in the destination wallet**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"🎉 Your swap is **completed** and has been **received in the destination wallet**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
             else if (status.DepositChannelExpired)
             {
                 message =
-                    $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
             else if (string.Equals(status.State, "AWAITING_DEPOSIT", StringComparison.Ordinal))
             {
                 // we are waiting for the user to send funds
                 message =
-                    $"⌛ Your swap is **waiting for funds**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"⌛ Your swap is **waiting for funds**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
             else if (string.Equals(status.State, "DEPOSIT_RECEIVED", StringComparison.Ordinal))
             {
                 // funds have been received and the swap is being performed
                 message =
-                    $"⚙️ Your swap has **received funds** and is **being performed**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"⚙️ Your swap has **received funds** and is **being performed**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
             else if (string.Equals(status.State, "SWAP_EXECUTED", StringComparison.Ordinal))
             {
                 // funds have been swapped through the AMM and awaiting scheduling
                 message =
-                    $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
             else if (string.Equals(status.State, "EGRESS_SCHEDULED", StringComparison.Ordinal))
             {
                 // funds have been scheduled to be sent to the destination address
                 message =
-                    $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
             else if (string.Equals(status.State, "BROADCAST_REQUESTED", StringComparison.Ordinal))
             {
                 // a validator has been requested to send the funds
                 message =
-                    $"🏦 Your swap has **been scheduled** and is **awaiting sending**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"🏦 Your swap has **been scheduled** and is **awaiting sending**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
                 
             }
             else if (string.Equals(status.State, "BROADCASTED", StringComparison.Ordinal))
             {
                 // the transaction has been included in a block on the destination chain
                 message =
-                    $"🪙 Your swap has been **sent on the destination chain**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+                    $"🪙 Your swap has been **sent on the destination chain**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
             else if (string.Equals(status.State, "BROADCAST_ABORTED", StringComparison.Ordinal))
             {
                 // the transaction could not be successfully completed
-                message = "💩 Something has gone wrong, please contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.";
+                message = 
+                    $"💩 Something has gone wrong, please contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support. *(reference {swap.StateId})*";
             }
 
             if (!string.IsNullOrWhiteSpace(message))
