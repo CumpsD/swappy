@@ -169,77 +169,59 @@ namespace SwappyBot.Commands.Status
             var status = statusResponse.Value.Status;
 
             var message = string.Empty;
-            var swapCompleted = string.Equals(status.State, "COMPLETE", StringComparison.Ordinal);
-            var swapExpired = status.DepositChannelExpired;
 
-            if (swapCompleted)
+            if (string.Equals(status.State, "COMPLETE", StringComparison.Ordinal))
             {
-                var url = $"{_configuration.CompletedSwapUrl}/{status.SwapId}";
-                message = 
-                    $"🎉 Your swap is **completed**, you can view it on **[Chainflip's official website]({url})**.";
+                // the transaction has been confirmed beyond our safety margin
+                message =
+                    $"🎉 Your swap is **completed** and has been **received in the destination wallet**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
             }
-            else if (swapExpired)
+            else if (status.DepositChannelExpired)
             {
-                if (status.SwapId != null)
-                {
-                    var url = $"{_configuration.CompletedSwapUrl}/{status.SwapId}";
-                    message =
-                        $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({url})**.";
-                }
-                else
-                {
-                    var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
-                    message =
-                        $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({url})**.";
-                }
+                message =
+                    $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
             }
             else if (string.Equals(status.State, "AWAITING_DEPOSIT", StringComparison.Ordinal))
             {
                 // we are waiting for the user to send funds
-                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
-                    $"⌛ Your swap is **waiting for funds**, you can view it on **[Chainflip's official website]({url})**.";
+                    $"⌛ Your swap is **waiting for funds**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
             }
             else if (string.Equals(status.State, "DEPOSIT_RECEIVED", StringComparison.Ordinal))
             {
                 // funds have been received and the swap is being performed
-                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
-                    $"⚙️ Your swap has received funds and is **being performed**, you can view it on **[Chainflip's official website]({url})**.";
+                    $"⚙️ Your swap has **received funds** and is **being performed**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
             }
             else if (string.Equals(status.State, "SWAP_EXECUTED", StringComparison.Ordinal))
             {
                 // funds have been swapped through the AMM and awaiting scheduling
-                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
-                    $"⚙️ Your swap has been swapped and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({url})**.";
+                    $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
+            }
+            else if (string.Equals(status.State, "EGRESS_SCHEDULED", StringComparison.Ordinal))
+            {
+                // funds have been scheduled to be sent to the destination address
+                message =
+                    $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
             }
             else if (string.Equals(status.State, "BROADCAST_REQUESTED", StringComparison.Ordinal))
             {
                 // a validator has been requested to send the funds
-                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
-                    $"🏦 Your swap has been scheduled and is **awaiting sending**, you can view it on **[Chainflip's official website]({url})**.";
+                    $"🏦 Your swap has **been scheduled** and is **awaiting sending**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
                 
             }
             else if (string.Equals(status.State, "BROADCASTED", StringComparison.Ordinal))
             {
                 // the transaction has been included in a block on the destination chain
-                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
-                    $"🪙 Your swap has been **sent on the destination chain**, you can view it on **[Chainflip's official website]({url})**.";
+                    $"🪙 Your swap has been **sent on the destination chain**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**.";
             }
             else if (string.Equals(status.State, "BROADCAST_ABORTED", StringComparison.Ordinal))
             {
                 // the transaction could not be successfully completed
                 message = "💩 Something has gone wrong, please contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support.";
-            }
-            else if (string.Equals(status.State, "COMPLETE", StringComparison.Ordinal))
-            {
-                // the transaction has been confirmed beyond our safety margin
-                var url = $"{_configuration.CompletedSwapUrl}/{status.SwapId}";
-                message =
-                    $"🪙 Your swap has been **received in the destination wallet**, you can view it on **[Chainflip's official website]({url})**.";
             }
 
             if (!string.IsNullOrWhiteSpace(message))
@@ -262,5 +244,10 @@ namespace SwappyBot.Commands.Status
                 });
             }
         }
+
+        private string BuildUrl(SwapState swap, SwapStatus status) 
+            => string.IsNullOrWhiteSpace(status.SwapId)
+                ? $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}"
+                : $"{_configuration.CompletedSwapUrl}/{status.SwapId}";
     }
 }
