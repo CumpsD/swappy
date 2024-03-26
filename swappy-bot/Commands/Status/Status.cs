@@ -42,9 +42,10 @@ namespace SwappyBot.Commands.Status
             var stateId = reference.ToLowerInvariant();
 
             _logger.LogInformation(
-                "[{StateId}] Command /{Command}, Server: {Server}, User: {User}",
+                "[{StateId}] Command /{Command} {Reference}, Server: {Server}, User: {User}",
                 stateId,
                 SlashCommands.Status,
+                reference,
                 Context.Guild.Name,
                 Context.User.Username);
 

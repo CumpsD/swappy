@@ -37,9 +37,12 @@ namespace SwappyBot.Commands.Quote
             var stateId = $"0x{Guid.NewGuid():N}";
 
             _logger.LogInformation(
-                "[{StateId}] Command /{Command}, Server: {Server}, User: {User}",
+                "[{StateId}] Command /{Command} {Amount} {From} {To}, Server: {Server}, User: {User}",
                 stateId,
                 SlashCommands.Quote,
+                amount,
+                from,
+                to,
                 Context.Guild.Name,
                 Context.User.Username);
             
