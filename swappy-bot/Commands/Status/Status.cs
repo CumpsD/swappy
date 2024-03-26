@@ -1,7 +1,6 @@
 namespace SwappyBot.Commands.Status
 {
     using System;
-    using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Discord;
@@ -48,9 +47,9 @@ namespace SwappyBot.Commands.Status
                 Context.Guild.Name,
                 Context.User.Username);
 
-            var swap = await GetSwap(stateId);
+            var swapState = await GetSwap(stateId);
 
-            if (swap.IsFailed)
+            if (swapState.IsFailed)
             {
                 // Send support message
                 await ModifyOriginalResponseAsync(x =>
@@ -58,18 +57,85 @@ namespace SwappyBot.Commands.Status
                     x.Flags = MessageFlags.SuppressEmbeds;
                     x.Content =
                         "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support. (**" +
-                        swap.BuildError() + 
+                        swapState.BuildError() + 
                         "**)";
                 });
 
                 return;
             }
 
+            var swap = swapState.Value;
+            
+            switch (swap.SwapAccepted)
+            {
+                case null when swap.SwapCancelled == null:
+                    await ModifyOriginalResponseAsync(x =>
+                    {
+                        x.Flags = MessageFlags.SuppressEmbeds;
+                        x.Content =
+                            "🙈 Your swap is **not yet started**! You are still busy preparing one, finish it first before checking the status.";
+                    });
+
+                    return;
+                
+                case null when swap.SwapCancelled != null:
+                    await ModifyOriginalResponseAsync(x =>
+                    {
+                        x.Flags = MessageFlags.SuppressEmbeds;
+                        x.Content =
+                            "🙈 Your swap is **cancelled**! Start a new one by typing `/swap`.";
+                    });
+
+                    return;
+            }
+
+            if (string.IsNullOrWhiteSpace(swap.DepositChannel))
+            {
+                // Send support message
+                await ModifyOriginalResponseAsync(x =>
+                {
+                    x.Flags = MessageFlags.SuppressEmbeds;
+                    x.Content =
+                        "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support. (**" +
+                        "No deposit channel found" + 
+                        "**)";
+                });
+
+                return;
+            }
+            
+            await SendChainflipStatus(swap);
+        }
+
+        private async Task<Result<SwapState>> GetSwap(string stateId)
+        {
+            try
+            {
+                var swap = await _dbContext
+                    .SwapState
+                    .FirstOrDefaultAsync(x => x.StateId == stateId);
+
+                return swap == null 
+                    ? Result.Fail("Swap does not exist.") 
+                    : Result.Ok(swap);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    e,
+                    "Could not fetch swap");
+                
+                return Result.Fail("Something has gone wrong while fetching swap.");
+            }
+        }
+
+        private async Task SendChainflipStatus(SwapState swap)
+        {
             var statusResponse = await StatusProvider.GetStatusAsync(
                 _logger,
                 _configuration,
                 _httpClientFactory,
-                swap.Value.DepositChannel!);
+                swap.DepositChannel!);
             
             if (statusResponse.IsFailed)
             {
@@ -88,7 +154,7 @@ namespace SwappyBot.Commands.Status
 
             try
             {
-                swap.Value.SwapStatus = statusResponse.Value.Body;
+                swap.SwapStatus = statusResponse.Value.Body;
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception e)
@@ -114,15 +180,13 @@ namespace SwappyBot.Commands.Status
             {
                 if (status.SwapId != null)
                 {
-                    // https://scan.chainflip.io/swaps
                     var url = $"{_configuration.CompletedSwapUrl}/{status.SwapId}";
                     message =
                         $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({url})**.";
                 }
                 else
                 {
-                    // https://scan.chainflip.io/channels
-                    var url = $"{_configuration.DepositChannelUrl}/{swap.Value.DepositChannel}";
+                    var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                     message =
                         $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({url})**.";
                 }
@@ -130,28 +194,28 @@ namespace SwappyBot.Commands.Status
             else if (string.Equals(status.State, "AWAITING_DEPOSIT", StringComparison.Ordinal))
             {
                 // we are waiting for the user to send funds
-                var url = $"{_configuration.DepositChannelUrl}/{swap.Value.DepositChannel}";
+                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
                     $"⌛ Your swap is **waiting for funds**, you can view it on **[Chainflip's official website]({url})**.";
             }
             else if (string.Equals(status.State, "DEPOSIT_RECEIVED", StringComparison.Ordinal))
             {
                 // funds have been received and the swap is being performed
-                var url = $"{_configuration.DepositChannelUrl}/{swap.Value.DepositChannel}";
+                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
                     $"⚙️ Your swap has received funds and is **being performed**, you can view it on **[Chainflip's official website]({url})**.";
             }
             else if (string.Equals(status.State, "SWAP_EXECUTED", StringComparison.Ordinal))
             {
                 // funds have been swapped through the AMM and awaiting scheduling
-                var url = $"{_configuration.DepositChannelUrl}/{swap.Value.DepositChannel}";
+                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
                     $"⚙️ Your swap has been swapped and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({url})**.";
             }
             else if (string.Equals(status.State, "BROADCAST_REQUESTED", StringComparison.Ordinal))
             {
                 // a validator has been requested to send the funds
-                var url = $"{_configuration.DepositChannelUrl}/{swap.Value.DepositChannel}";
+                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
                     $"🏦 Your swap has been scheduled and is **awaiting sending**, you can view it on **[Chainflip's official website]({url})**.";
                 
@@ -159,7 +223,7 @@ namespace SwappyBot.Commands.Status
             else if (string.Equals(status.State, "BROADCASTED", StringComparison.Ordinal))
             {
                 // the transaction has been included in a block on the destination chain
-                var url = $"{_configuration.DepositChannelUrl}/{swap.Value.DepositChannel}";
+                var url = $"{_configuration.DepositChannelUrl}/{swap.DepositChannel}";
                 message =
                     $"🪙 Your swap has been **sent on the destination chain**, you can view it on **[Chainflip's official website]({url})**.";
             }
@@ -194,28 +258,6 @@ namespace SwappyBot.Commands.Status
                         "Swap status could not be parsed" + 
                         "**)";
                 });
-            }
-        }
-
-        private async Task<Result<SwapState>> GetSwap(string stateId)
-        {
-            try
-            {
-                var swap = await _dbContext
-                    .SwapState
-                    .FirstOrDefaultAsync(x => x.StateId == stateId);
-
-                return swap == null 
-                    ? Result.Fail("Swap does not exist.") 
-                    : Result.Ok(swap);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(
-                    e,
-                    "Could not fetch swap");
-                
-                return Result.Fail("Something has gone wrong while fetching swap.");
             }
         }
     }
