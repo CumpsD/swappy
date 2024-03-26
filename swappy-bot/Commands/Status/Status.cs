@@ -11,6 +11,7 @@ namespace SwappyBot.Commands.Status
     using Microsoft.Extensions.Options;
     using SwappyBot.Configuration;
     using SwappyBot.EntityFramework;
+    using SwappyBot.Infrastructure;
 
     public class Status : InteractionModuleBase<SocketInteractionContext>
     {
@@ -65,28 +66,29 @@ namespace SwappyBot.Commands.Status
             }
 
             var swap = swapState.Value;
-            
-            switch (swap.SwapAccepted)
+
+            if (swap.SwapAccepted.IsEmptyDate() && swap.SwapCancelled.IsEmptyDate())
             {
-                case null when swap.SwapCancelled == null:
-                    await ModifyOriginalResponseAsync(x =>
-                    {
-                        x.Flags = MessageFlags.SuppressEmbeds;
-                        x.Content =
-                            "🙈 Your swap is **not yet started**! You are still busy preparing one, finish it first before checking the status.";
-                    });
+                await ModifyOriginalResponseAsync(x =>
+                {
+                    x.Flags = MessageFlags.SuppressEmbeds;
+                    x.Content =
+                        "🙈 Your swap is **not yet started**! You are still busy preparing one, finish it first before checking the status.";
+                });
 
-                    return;
-                
-                case null when swap.SwapCancelled != null:
-                    await ModifyOriginalResponseAsync(x =>
-                    {
-                        x.Flags = MessageFlags.SuppressEmbeds;
-                        x.Content =
-                            "🙈 Your swap is **cancelled**! Start a new one by typing `/swap`.";
-                    });
+                return;
+            }
 
-                    return;
+            if (swap.SwapAccepted.IsEmptyDate() && !swap.SwapCancelled.IsEmptyDate())
+            {
+                await ModifyOriginalResponseAsync(x =>
+                {
+                    x.Flags = MessageFlags.SuppressEmbeds;
+                    x.Content =
+                        "🙈 Your swap is **cancelled**! Start a new one by typing `/swap`.";
+                });
+
+                return;
             }
 
             if (string.IsNullOrWhiteSpace(swap.DepositChannel))
