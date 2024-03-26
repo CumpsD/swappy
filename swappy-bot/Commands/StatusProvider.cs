@@ -95,5 +95,8 @@ namespace SwappyBot.Commands
 
         [JsonPropertyName("egressAmount")]
         public string? EgressAmount { get; set; }
+
+        [JsonPropertyName("swapId")]
+        public double? SwapId { get; set; }
     }
 }

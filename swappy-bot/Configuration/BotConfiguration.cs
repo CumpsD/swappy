@@ -63,5 +63,19 @@ namespace SwappyBot.Configuration
         {
             get; init;
         }
+        
+        [Required]
+        [NotNull]
+        public string? CompletedSwapUrl
+        {
+            get; init;
+        }
+        
+        [Required]
+        [NotNull]
+        public string? DepositChannelUrl
+        {
+            get; init;
+        }
     }
 }
