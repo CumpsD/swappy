@@ -15,7 +15,8 @@ Currently the following currencies are supported:
 * Ethereum (ETH)
 * Chainflip (FLIP)
 * USDC on Ethereum (USDC)
-
+* USDT on Ethereum (USDT)
+  
 Simply type `/swap` on Discord and follow the provided steps.
 
 * Select the asset to send.
