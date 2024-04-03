@@ -14,6 +14,7 @@ namespace SwappyBot.Commands
             [ChoiceDisplay("Ethereum (ETH)")] eth,
             [ChoiceDisplay("Chainflip (FLIP)")] flip,
             [ChoiceDisplay("ethUSDC (USDC)")] usdc,
+            [ChoiceDisplay("ethUSDT (USDT)")] usdt,
         }
         
         public static readonly Dictionary<string, AssetInfo> SupportedAssets = new()
@@ -82,6 +83,22 @@ namespace SwappyBot.Commands
                     "usdc",
                     "USDC",
                     "ethUSDC",
+                    "Ethereum",
+                    6,
+                    20m,
+                    [100m, 500m, 1000m, 2500m, 5000m, 10000m, 25000m, 40000m],
+                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
+                         AddressUtil.Current.IsValidAddressLength(x) &&
+                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
+            },
+            
+            {
+                "usdt",
+                new AssetInfo(
+                    "usdt",
+                    "USDT",
+                    "ethUSDT",
                     "Ethereum",
                     6,
                     20m,
