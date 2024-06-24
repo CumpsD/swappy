@@ -15,6 +15,8 @@ namespace SwappyBot.Commands
             [ChoiceDisplay("Chainflip (FLIP)")] flip,
             [ChoiceDisplay("ethUSDC (USDC)")] usdc,
             [ChoiceDisplay("ethUSDT (USDT)")] usdt,
+            [ChoiceDisplay("arbEthereum (ETH)")] arbeth,
+            [ChoiceDisplay("arbUSDC (USDC)")] arbusdc,
         }
         
         public static readonly Dictionary<string, AssetInfo> SupportedAssets = new()
@@ -100,6 +102,38 @@ namespace SwappyBot.Commands
                     "USDT",
                     "ethUSDT",
                     "Ethereum",
+                    6,
+                    20m,
+                    [100m, 500m, 1000m, 2500m, 5000m, 10000m, 25000m, 40000m],
+                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
+                         AddressUtil.Current.IsValidAddressLength(x) &&
+                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
+            },
+            
+            {
+                "arbeth",
+                new AssetInfo(
+                    "arbeth",
+                    "ETH",
+                    "arbEthereum",
+                    "Arbitrum",
+                    18,
+                    0.01m,
+                    [0.02m, 0.04m, 0.1m, 0.2m, 0.5m, 1m, 2m, 5m, 10m, 20m],
+                    x => AddressUtil.Current.IsNotAnEmptyAddress(x) &&
+                         AddressUtil.Current.IsValidAddressLength(x) &&
+                         AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
+                         (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
+            },
+            
+            {
+                "arbusdc",
+                new AssetInfo(
+                    "usdc",
+                    "USDC",
+                    "arbUSDC",
+                    "Arbitrum",
                     6,
                     20m,
                     [100m, 500m, 1000m, 2500m, 5000m, 10000m, 25000m, 40000m],
