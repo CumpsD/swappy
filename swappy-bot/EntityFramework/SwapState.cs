@@ -54,8 +54,8 @@ namespace SwappyBot.EntityFramework
             builder.Property(x => x.SwapStarted).IsRequired();
             builder.HasIndex(x => x.SwapStarted);
             
-            builder.Property(x => x.AssetFrom).IsRequired(false).HasMaxLength(5);
-            builder.Property(x => x.AssetTo).IsRequired(false).HasMaxLength(5);
+            builder.Property(x => x.AssetFrom).IsRequired(false).HasMaxLength(10);
+            builder.Property(x => x.AssetTo).IsRequired(false).HasMaxLength(10);
             builder.Property(x => x.Amount).IsRequired(false);
             builder.Property(x => x.DestinationAddress).IsRequired(false).HasMaxLength(100);
 
