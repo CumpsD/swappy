@@ -130,7 +130,7 @@ namespace SwappyBot.Commands
             {
                 "arbusdc",
                 new AssetInfo(
-                    "usdc",
+                    "arbusdc",
                     "USDC",
                     "arbUSDC",
                     "Arbitrum",
