@@ -17,6 +17,8 @@ namespace SwappyBot.Commands
             [ChoiceDisplay("ethUSDT (USDT)")] usdt,
             [ChoiceDisplay("arbEthereum (ETH)")] arbeth,
             [ChoiceDisplay("arbUSDC (USDC)")] arbusdc,
+            [ChoiceDisplay("Solana (SOL)")] sol,
+            [ChoiceDisplay("solUSDC (USDC)")] solusdc,
         }
         
         public static readonly Dictionary<string, AssetInfo> SupportedAssets = new()
@@ -31,7 +33,7 @@ namespace SwappyBot.Commands
                     8,
                     0.0007m,
                     [0.005m, 0.01m, 0.02m, 0.05m, 0.1m, 0.2m, 0.5m, 1.0m, 2.0m],
-                    BitcoinAddressValidator.IsValidAddress)
+                    AddressValidator.IsValidBitcoinAddress)
             },
 
             {
@@ -141,6 +143,33 @@ namespace SwappyBot.Commands
                          AddressUtil.Current.IsValidAddressLength(x) &&
                          AddressUtil.Current.IsValidEthereumAddressHexFormat(x) &&
                          (AddressUtil.Current.IsChecksumAddress(x) || x == x.ToLower() || x[2..] == x[2..].ToUpper()))
+            },
+            
+            
+            {
+                "sol",
+                new AssetInfo(
+                    "sol",
+                    "SOL",
+                    "Solana",
+                    "Solana",
+                    9,
+                    0.01m,
+                    [0.2m, 0.4m, 1m, 2m, 5m, 10m, 20m, 50m, 100m, 200m],
+                    AddressValidator.IsValidSolanaAddress)
+            },
+            
+            {
+                "solusdc",
+                new AssetInfo(
+                    "solusdc",
+                    "USDC",
+                    "solUSDC",
+                    "Solana",
+                    6,
+                    20m,
+                    [100m, 500m, 1000m, 2500m, 5000m, 10000m, 25000m, 40000m],
+                    AddressValidator.IsValidSolanaAddress)
             },
         };
     }
