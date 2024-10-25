@@ -119,7 +119,7 @@ namespace SwappyBot
                     swap.SwapStatus = status.Value.Body;
 
                     var s = status!.Value;
-                    var swapCompleted = string.Equals(s.Status.State, "COMPLETE", StringComparison.Ordinal);
+                    var swapCompleted = string.Equals(s.Status.State, "completed", StringComparison.OrdinalIgnoreCase);
 
                     // If completed, reply and mark it as done
                     if (swapCompleted)
@@ -130,7 +130,7 @@ namespace SwappyBot
                     else
                     {
                         // If not completed and expired, mark as done
-                        var swapExpired = s.Status.DepositChannelExpired;
+                        var swapExpired = s.Status.DepositChannelStatus.IsExpired;
                         if (swapExpired)
                             swap.Replied = true;
                     }
@@ -154,8 +154,8 @@ namespace SwappyBot
 
             var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
             var assetTo = Assets.SupportedAssets[swapState.AssetTo];
-            var amountFrom = decimal.Parse(status.DepositAmount) / Convert.ToDecimal(Math.Pow(10, assetFrom.Decimals));
-            var amountTo = decimal.Parse(status.EgressAmount) / Convert.ToDecimal(Math.Pow(10, assetTo.Decimals));
+            var amountFrom = status.DepositStatus.DepositAmount.Value;
+            var amountTo = status.EgressStatus.EgressAmount.Value;
             
             for (var i = 0; i < _configuration.NotificationChannelIds.Length; i++)
             {

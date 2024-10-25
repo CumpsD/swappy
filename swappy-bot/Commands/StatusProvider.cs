@@ -81,22 +81,40 @@ namespace SwappyBot.Commands
         [JsonIgnore]
         public string Body { get; set; }
     }
-    
+
     public class SwapStatus 
     {
         [JsonPropertyName("state")]
         public string State { get; set; }
         
-        [JsonPropertyName("isDepositChannelExpired")]
-        public bool DepositChannelExpired { get; set; }
+        [JsonPropertyName("depositChannel")]
+        public DepositChannelStatus DepositChannelStatus { get; set; }
         
-        [JsonPropertyName("depositAmount")]
-        public string? DepositAmount { get; set; }
-
-        [JsonPropertyName("egressAmount")]
-        public string? EgressAmount { get; set; }
-
+        [JsonPropertyName("deposit")]
+        public DepositStatus DepositStatus { get; set; }
+        
+        [JsonPropertyName("swapEgress")]
+        public EgressStatus EgressStatus { get; set; }
+        
         [JsonPropertyName("swapId")]
         public string? SwapId { get; set; }
+    }
+
+    public class DepositChannelStatus
+    {
+        [JsonPropertyName("isExpired")]
+        public bool IsExpired { get; set; }
+    }
+
+    public class DepositStatus
+    {
+        [JsonPropertyName("amount")]
+        public double? DepositAmount { get; set; }
+    }
+
+    public class EgressStatus
+    {
+        [JsonPropertyName("amount")]
+        public double? EgressAmount { get; set; }
     }
 }

@@ -171,55 +171,49 @@ namespace SwappyBot.Commands.Status
 
             var message = string.Empty;
 
-            if (string.Equals(status.State, "COMPLETE", StringComparison.Ordinal))
+            if (string.Equals(status.State, "completed", StringComparison.OrdinalIgnoreCase))
             {
                 // the transaction has been confirmed beyond our safety margin
                 message =
                     $"🎉 Your swap is **completed** and has been **received in the destination wallet**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
-            else if (status.DepositChannelExpired)
+            else if (status.DepositChannelStatus.IsExpired)
             {
                 message =
                     $"⌛ Your swap has **expired**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
-            else if (string.Equals(status.State, "AWAITING_DEPOSIT", StringComparison.Ordinal))
+            else if (string.Equals(status.State, "waiting", StringComparison.OrdinalIgnoreCase))
             {
                 // we are waiting for the user to send funds
                 message =
                     $"⌛ Your swap is **waiting for funds**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
-            else if (string.Equals(status.State, "DEPOSIT_RECEIVED", StringComparison.Ordinal))
+            else if (string.Equals(status.State, "receiving", StringComparison.OrdinalIgnoreCase))
             {
                 // funds have been received and the swap is being performed
                 message =
                     $"⚙️ Your swap has **received funds** and is **being performed**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
-            else if (string.Equals(status.State, "SWAP_EXECUTED", StringComparison.Ordinal))
+            else if (string.Equals(status.State, "swapping", StringComparison.OrdinalIgnoreCase))
             {
                 // funds have been swapped through the AMM and awaiting scheduling
                 message =
                     $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
-            else if (string.Equals(status.State, "EGRESS_SCHEDULED", StringComparison.Ordinal))
-            {
-                // funds have been scheduled to be sent to the destination address
-                message =
-                    $"⚙️ Your swap has **been swapped** and is **awaiting scheduling**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
-            }
-            else if (string.Equals(status.State, "BROADCAST_REQUESTED", StringComparison.Ordinal))
+            else if (string.Equals(status.State, "sending", StringComparison.OrdinalIgnoreCase))
             {
                 // a validator has been requested to send the funds
                 message =
                     $"🏦 Your swap has **been scheduled** and is **awaiting sending**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
                 
             }
-            else if (string.Equals(status.State, "BROADCASTED", StringComparison.Ordinal))
+            else if (string.Equals(status.State, "sent", StringComparison.OrdinalIgnoreCase))
             {
                 // the transaction has been included in a block on the destination chain
                 message =
                     $"🪙 Your swap has been **sent on the destination chain**, you can view it on **[Chainflip's official website]({BuildUrl(swap, status)})**. *(reference {swap.StateId})*";
             }
-            else if (string.Equals(status.State, "BROADCAST_ABORTED", StringComparison.Ordinal))
+            else if (string.Equals(status.State, "failed", StringComparison.OrdinalIgnoreCase))
             {
                 // the transaction could not be successfully completed
                 message = 
