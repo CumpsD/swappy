@@ -56,17 +56,17 @@ namespace SwappyBot.EntityFramework
             
             builder.Property(x => x.AssetFrom).IsRequired(false).HasMaxLength(10);
             builder.Property(x => x.AssetTo).IsRequired(false).HasMaxLength(10);
-            builder.Property(x => x.Amount).IsRequired(false);
+            builder.Property(x => x.Amount).IsRequired(false).HasPrecision(27, 18);
             builder.Property(x => x.DestinationAddress).IsRequired(false).HasMaxLength(100);
 
             builder.Property(x => x.QuoteTime).IsRequired(false);
             builder.HasIndex(x => x.QuoteTime);
             
-            builder.Property(x => x.QuoteDeposit).IsRequired(false);
-            builder.Property(x => x.QuoteReceive).IsRequired(false);
+            builder.Property(x => x.QuoteDeposit).IsRequired(false).HasPrecision(27, 18);
+            builder.Property(x => x.QuoteReceive).IsRequired(false).HasPrecision(27, 18);
             builder.Property(x => x.QuoteRate).IsRequired(false).HasMaxLength(200);
-            builder.Property(x => x.QuotePlatformFee).IsRequired(false);
-            builder.Property(x => x.QuoteChainflipFee).IsRequired(false);
+            builder.Property(x => x.QuotePlatformFee).IsRequired(false).HasPrecision(27, 18);
+            builder.Property(x => x.QuoteChainflipFee).IsRequired(false).HasPrecision(27, 18);
             
             builder.Property(x => x.SwapAccepted).IsRequired(false);
             builder.HasIndex(x => x.SwapAccepted);

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SwappyBot.EntityFramework;
@@ -11,9 +12,11 @@ using SwappyBot.EntityFramework;
 namespace SwappyBot.Migrations
 {
     [DbContext(typeof(BotContext))]
-    partial class BotContextModelSnapshot : ModelSnapshot
+    [Migration("20250128204642_FixPrecisions")]
+    partial class FixPrecisions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,18 +72,15 @@ namespace SwappyBot.Migrations
                         .HasColumnName("destinationaddress");
 
                     b.Property<decimal?>("QuoteChainflipFee")
-                        .HasPrecision(27, 18)
-                        .HasColumnType("numeric(27,18)")
+                        .HasColumnType("numeric")
                         .HasColumnName("quotechainflipfee");
 
                     b.Property<decimal?>("QuoteDeposit")
-                        .HasPrecision(27, 18)
-                        .HasColumnType("numeric(27,18)")
+                        .HasColumnType("numeric")
                         .HasColumnName("quotedeposit");
 
                     b.Property<decimal?>("QuotePlatformFee")
-                        .HasPrecision(27, 18)
-                        .HasColumnType("numeric(27,18)")
+                        .HasColumnType("numeric")
                         .HasColumnName("quoteplatformfee");
 
                     b.Property<string>("QuoteRate")
@@ -89,8 +89,7 @@ namespace SwappyBot.Migrations
                         .HasColumnName("quoterate");
 
                     b.Property<decimal?>("QuoteReceive")
-                        .HasPrecision(27, 18)
-                        .HasColumnType("numeric(27,18)")
+                        .HasColumnType("numeric")
                         .HasColumnName("quotereceive");
 
                     b.Property<DateTimeOffset?>("QuoteTime")
