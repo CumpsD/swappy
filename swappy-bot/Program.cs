@@ -117,7 +117,8 @@
                 
                 .AddDbContextPool<BotContext>((provider, options) => options
                     .UseLoggerFactory(provider.GetRequiredService<ILoggerFactory>())
-                    .UseMySql(connectionString, Db.Version));
+                    .UseNpgsql(connectionString, x => x.EnableRetryOnFailure())
+                    .UseLowerCaseNamingConvention());
 
             builder
                 .Register(x => new EntityFrameworkLogger(x.Resolve<ILoggerFactory>()))

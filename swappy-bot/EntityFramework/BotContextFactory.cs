@@ -23,7 +23,9 @@ namespace SwappyBot.EntityFramework
             var optionsBuilder = new DbContextOptionsBuilder<BotContext>();
             var connectionString = configuration.GetConnectionString("Migrations");
             
-            optionsBuilder.UseMySql(connectionString, Db.Version);
+            optionsBuilder
+                .UseNpgsql(connectionString)
+                .UseLowerCaseNamingConvention();
             
             return new BotContext(optionsBuilder.Options);
         }
