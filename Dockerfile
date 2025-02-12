@@ -2,7 +2,7 @@
 USER $APP_UID
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0.102 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.200 AS build
 
 ARG BUILD_CONFIGURATION=Release
 ARG BUILD_NUMBER
