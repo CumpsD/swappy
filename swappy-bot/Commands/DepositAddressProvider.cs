@@ -22,7 +22,7 @@ namespace SwappyBot.Commands
         {
             using var client = httpClientFactory.CreateClient("Broker");
 
-            // TODO: Add minimumPrice
+            // TODO: Add minimumPrice, 2% slippage
             var swapRequest =
                 $"swap" +
                 $"?amount={amount}" +

@@ -1,8 +1,8 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:9.0.1 AS base
+﻿FROM mcr.microsoft.com/dotnet/runtime:9.0.5 AS base
 USER $APP_UID
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0.102 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.300 AS build
 
 ARG BUILD_CONFIGURATION=Release
 ARG BUILD_NUMBER
