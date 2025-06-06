@@ -404,6 +404,7 @@ namespace SwappyBot.Commands.Swap
             swapState.QuoteTime = quoteTime;
             swapState.QuoteDeposit = quoteDeposit;
             swapState.QuoteReceive = quoteReceive;
+            swapState.QuoteMinPrice = quote.EstimatedPrice;
             swapState.QuoteRate = quoteRate;
 
             await Context.Channel.SendMessageAsync(
@@ -677,6 +678,7 @@ namespace SwappyBot.Commands.Swap
                 swapState.QuoteTime = quoteTime;
                 swapState.QuoteDeposit = quoteDeposit;
                 swapState.QuoteReceive = quoteReceive;
+                swapState.QuoteMinPrice = quote.EstimatedPrice;
                 swapState.QuoteRate = quoteRate;
             }
 
@@ -785,6 +787,7 @@ namespace SwappyBot.Commands.Swap
             DepositAddressResponse deposit;
             try
             {
+                var swapStateQuoteMinPrice = swapState.QuoteMinPrice;
                 var depositResult = await DepositAddressProvider.GetDepositAddressAsync(
                     _logger,
                     _configuration,
@@ -793,7 +796,8 @@ namespace SwappyBot.Commands.Swap
                     assetFrom,
                     assetTo,
                     swapState.DestinationAddress,
-                    swapState.RefundAddress);
+                    swapState.RefundAddress,
+                    swapStateQuoteMinPrice.Value);
 
                 if (depositResult.IsFailed)
                     throw new Exception("Failed generating deposit address.");

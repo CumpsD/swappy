@@ -21,6 +21,7 @@ namespace SwappyBot.EntityFramework
         
         public decimal? QuoteDeposit { get; set; }
         public decimal? QuoteReceive { get; set; }
+        public decimal? QuoteMinPrice { get; set; }
         public string? QuoteRate { get; set; }
         public decimal? QuotePlatformFee { get; set; }
         public decimal? QuoteChainflipFee { get; set; }
@@ -66,6 +67,7 @@ namespace SwappyBot.EntityFramework
             
             builder.Property(x => x.QuoteDeposit).IsRequired(false).HasPrecision(27, 18);
             builder.Property(x => x.QuoteReceive).IsRequired(false).HasPrecision(27, 18);
+            builder.Property(x => x.QuoteMinPrice).IsRequired(false).HasPrecision(27, 18);
             builder.Property(x => x.QuoteRate).IsRequired(false).HasMaxLength(200);
             builder.Property(x => x.QuotePlatformFee).IsRequired(false).HasPrecision(27, 18);
             builder.Property(x => x.QuoteChainflipFee).IsRequired(false).HasPrecision(27, 18);

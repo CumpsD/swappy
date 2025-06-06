@@ -68,5 +68,8 @@ namespace SwappyBot.Commands
         
         [JsonPropertyName("egressAmount")]
         public decimal EgressAmount { get; set; }
+        
+        [JsonPropertyName("estimatedPrice")]
+        public decimal EstimatedPrice { get; set; }
     }
 }
