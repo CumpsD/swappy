@@ -17,16 +17,20 @@ namespace SwappyBot.Commands
             decimal amount,
             AssetInfo assetFrom,
             AssetInfo assetTo,
-            string destinationAddress)
+            string destinationAddress,
+            string refundAddress)
         {
             using var client = httpClientFactory.CreateClient("Broker");
 
+            // TODO: Add minimumPrice
             var swapRequest =
                 $"swap" +
                 $"?amount={amount}" +
                 $"&sourceAsset={assetFrom.Id}" +
                 $"&destinationAsset={assetTo.Id}" +
                 $"&destinationAddress={destinationAddress}" +
+                $"&refundAddress={refundAddress}" +
+                $"&retryDurationInBlocks=150" +
                 $"&apiKey={configuration.BrokerApiKey}";
             
             var swapResponse = await client.GetAsync(swapRequest);

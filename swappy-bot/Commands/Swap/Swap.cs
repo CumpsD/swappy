@@ -357,7 +357,7 @@ namespace SwappyBot.Commands.Swap
                 return;
             }
 
-            var address = BuildAddressButton(
+            var address = BuildDestinationAddressButton(
                 $"swap-step5-{stateId}",
                 assetTo);
 
@@ -486,14 +486,14 @@ namespace SwappyBot.Commands.Swap
             var assetTo = Assets.SupportedAssets[swapState.AssetTo];
 
             await ModifyOriginalResponseAsync(x =>
-                x.Components = BuildAddressButton(
+                x.Components = BuildDestinationAddressButton(
                     $"swap-step5-{stateId}",
                     assetTo,
                     false));
 
             if (string.IsNullOrWhiteSpace(address))
             {
-                var addressButton = BuildAddressButton(
+                var addressButton = BuildDestinationAddressButton(
                     $"swap-step5-{stateId}",
                     assetTo);
 
@@ -510,7 +510,7 @@ namespace SwappyBot.Commands.Swap
 
             if (!assetTo.AddressValidator(address))
             {
-                var addressButton = BuildAddressButton(
+                var addressButton = BuildDestinationAddressButton(
                     $"swap-step5-{stateId}",
                     assetTo);
 
@@ -525,6 +525,113 @@ namespace SwappyBot.Commands.Swap
                 return;
             }
 
+            swapState.DestinationAddress = address;
+            
+            var refundAddress = BuildRefundAddressButton(
+                $"swap-step6-{stateId}",
+                assetFrom);
+
+            await Context.Channel.SendMessageAsync(
+                $"We automatically apply a slippage limit of **2%** to prevent big price changes negatively impacting your swap.\n" +
+                $"\n" +
+                $"Provide the **refund** address where you want to receive **{assetFrom.Name} ({assetFrom.Ticker})** in case this slippage limit is hit.\n" +
+                $"This is not the final step, there will be a review step at the end, before performing the final swap.\n" +
+                $"\n" +
+                $"⚠️ **Double check to ensure the refund address is 100% accurate! Nobody has the ability to recover funds if you input the incorrect refund address!** ⚠️",
+                components: refundAddress);
+
+            _logger.LogInformation(
+                "[{StateId}] Asking for refund address",
+                stateId);
+
+            await _dbContext.SaveChangesAsync();
+        }
+        
+        [ComponentInteraction("swap-step6-*")]
+        public async Task SwapStep6(
+            string stateId)
+        {
+            var modal = new ModalBuilder()
+                .WithTitle("Refund Address")
+                .WithCustomId($"swap-step6b-{stateId}")
+                .AddTextInput(
+                    "Address",
+                    $"swap-step6b-{stateId}",
+                    placeholder: ".....",
+                    maxLength: 1000,
+                    minLength: 1,
+                    required: true)
+                .Build();
+
+            await Context.Interaction.RespondWithModalAsync(modal);
+
+            _logger.LogInformation(
+                "[{StateId}] Asked for a refund address",
+                stateId);
+        }
+        
+        [ModalInteraction("swap-step6b-*")]
+        public async Task SwapStep6b(
+            string stateId,
+            DummyModal _)
+        {
+            var data = ((SocketModal)Context.Interaction).Data;
+            var address = data.Components.First().Value;
+
+            await DeferAsync(ephemeral: true);
+
+            _logger.LogInformation(
+                "[{StateId}] Received {RefundAddress} as refund address",
+                stateId,
+                address);
+
+            var swapState = await _dbContext.SwapState.FindAsync(stateId);
+
+            var assetFrom = Assets.SupportedAssets[swapState.AssetFrom];
+            var assetTo = Assets.SupportedAssets[swapState.AssetTo];
+
+            await ModifyOriginalResponseAsync(x =>
+                x.Components = BuildRefundAddressButton(
+                    $"swap-step6-{stateId}",
+                    assetFrom,
+                    false));
+
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                var addressButton = BuildRefundAddressButton(
+                    $"swap-step6-{stateId}",
+                    assetFrom);
+
+                await Context.Channel.SendMessageAsync(
+                    $"❌ You need to provide a valid **{assetFrom.Name} ({assetFrom.Ticker})** address, please try again.",
+                    components: addressButton);
+
+                _logger.LogInformation(
+                    "[{StateId}] Provided an empty refund address",
+                    stateId);
+
+                return;
+            }
+
+            if (!assetFrom.AddressValidator(address))
+            {
+                var addressButton = BuildRefundAddressButton(
+                    $"swap-step6-{stateId}",
+                    assetFrom);
+
+                await Context.Channel.SendMessageAsync(
+                    $"❌ The address you specified is not a valid **{assetFrom.Name} ({assetFrom.Ticker})** address, please try again.",
+                    components: addressButton);
+
+                _logger.LogInformation(
+                    "[{StateId}] Provided an invalid refund address",
+                    stateId);
+
+                return;
+            }
+
+            swapState.RefundAddress = address;
+            
             if (swapState.QuoteTime.Value.AddSeconds(_configuration.QuoteValidityInSeconds.Value) <
                 DateTimeOffset.UtcNow)
             {
@@ -545,9 +652,9 @@ namespace SwappyBot.Commands.Swap
 
                 if (quoteResult.IsFailed)
                 {
-                    var addressButton = BuildAddressButton(
-                        $"swap-step5-{stateId}",
-                        assetTo);
+                    var addressButton = BuildRefundAddressButton(
+                        $"swap-step6-{stateId}",
+                        assetFrom);
                     
                     await Context.Channel.SendMessageAsync(
                         "💩 Something has gone wrong, you can try again, or contact us on [Discord](https://discord.gg/wwzZ7a7aQn) for support. (**" +
@@ -573,10 +680,8 @@ namespace SwappyBot.Commands.Swap
                 swapState.QuoteRate = quoteRate;
             }
 
-            swapState.DestinationAddress = address;
-
             var swapButtons = BuildSwapButtons(
-                "swap-step6", 
+                "swap-step7", 
                 stateId,
                 enabled: true,
                 addDisclaimer: true,
@@ -589,6 +694,7 @@ namespace SwappyBot.Commands.Swap
                 $"Receive: **{swapState.QuoteReceive} {assetTo.Ticker}**\n" +
                 $"\n" +
                 $"Destination Address: **{swapState.DestinationAddress}**\n" +
+                $"Refund Address: **{swapState.RefundAddress}**\n" +
                 $"Quote Date: **{swapState.QuoteTime:yyyy-MM-dd HH:mm:ss}**\n" +
                 $"\n" +
                 $"⚠️ **Review your Destination Address and the amounts carefully!** ⚠️\n" +
@@ -600,13 +706,14 @@ namespace SwappyBot.Commands.Swap
                 components: swapButtons);
 
             _logger.LogInformation(
-                "[{StateId}] Offered quote from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress}, now we just need confirmation",
+                "[{StateId}] Offered quote from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress}, refund to {RefundAddress}, now we just need confirmation",
                 stateId,
                 swapState.Amount,
                 assetFrom.Ticker,
                 swapState.QuoteReceive,
                 assetTo.Ticker,
-                swapState.DestinationAddress);
+                swapState.DestinationAddress,
+                swapState.RefundAddress);
 
             await _dbContext.SaveChangesAsync();
         }
@@ -619,14 +726,14 @@ namespace SwappyBot.Commands.Swap
             
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
-                    "swap-step6",
+                    "swap-step7",
                     stateId,
                     enabled: false,
                     addDisclaimer: true,
                     fromDisclaimer: false));
 
             var swapButtons = BuildSwapButtons(
-                "swap-step6",
+                "swap-step7",
                 stateId, 
                 enabled: true,
                 addDisclaimer: false,
@@ -646,8 +753,8 @@ namespace SwappyBot.Commands.Swap
                 stateId);
         }
 
-        [ComponentInteraction("swap-step6-ok-*-*")]
-        public async Task SwapStep6Approve(
+        [ComponentInteraction("swap-step7-ok-*-*")]
+        public async Task SwapStep7Approve(
             string stateId,
             bool fromDisclaimer)
         {
@@ -659,7 +766,7 @@ namespace SwappyBot.Commands.Swap
 
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
-                    "swap-step6",
+                    "swap-step7",
                     stateId,
                     enabled: false,
                     addDisclaimer: !fromDisclaimer,
@@ -685,7 +792,8 @@ namespace SwappyBot.Commands.Swap
                     swapState.Amount.Value,
                     assetFrom,
                     assetTo,
-                    swapState.DestinationAddress);
+                    swapState.DestinationAddress,
+                    swapState.RefundAddress);
 
                 if (depositResult.IsFailed)
                     throw new Exception("Failed generating deposit address.");
@@ -712,7 +820,7 @@ namespace SwappyBot.Commands.Swap
                     stateId);
 
                 var swapButtons = BuildSwapButtons(
-                    "swap-step6",
+                    "swap-step7",
                     stateId,
                     enabled: true,
                     addDisclaimer: false,
@@ -742,6 +850,7 @@ namespace SwappyBot.Commands.Swap
                 $"Deposit: **{swapState.Amount} {assetFrom.Ticker}**\n" +
                 $"Receive: **{swapState.QuoteReceive} {assetTo.Ticker}**\n" +
                 $"Destination Address: **{swapState.DestinationAddress}**\n" +
+                $"Refund Address: **{swapState.RefundAddress}**\n" +
                 $"\n" +
                 $"📩 **Deposit Address**: **`{deposit.Address}`**\n" +
                 $"\n" +
@@ -801,14 +910,15 @@ namespace SwappyBot.Commands.Swap
             }
 
             _logger.LogInformation(
-                "[{StateId}] Announced new swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress}",
+                "[{StateId}] Announced new swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress}, refund to {RefundAddress}",
                 stateId,
                 swapState.Amount,
                 assetFrom.Ticker,
                 swapState.QuoteReceive,
                 assetTo.Ticker,
                 swapState.DestinationAddress,
-                deposit.Address);
+                deposit.Address,
+                swapState.RefundAddress);
         }
 
         private async Task<ulong[]> NotifySwap(
@@ -836,8 +946,8 @@ namespace SwappyBot.Commands.Swap
             return messageIds.ToArray();
         }
 
-        [ComponentInteraction("swap-step6-nok-*-*")]
-        public async Task SwapStep6Cancel(
+        [ComponentInteraction("swap-step7-nok-*-*")]
+        public async Task SwapStep7Cancel(
             string stateId,
             bool fromDisclaimer)
         {
@@ -849,7 +959,7 @@ namespace SwappyBot.Commands.Swap
 
             await ModifyOriginalResponseAsync(x =>
                 x.Components = BuildSwapButtons(
-                    "swap-step6",
+                    "swap-step7",
                     stateId,
                     enabled: false,
                     addDisclaimer: !fromDisclaimer,
@@ -948,7 +1058,7 @@ namespace SwappyBot.Commands.Swap
             return builder.Build();
         }
 
-        private static MessageComponent BuildAddressButton(
+        private static MessageComponent BuildDestinationAddressButton(
             string id,
             AssetInfo asset,
             bool addressEnabled = true)
@@ -960,6 +1070,18 @@ namespace SwappyBot.Commands.Swap
                     disabled: !addressEnabled)
                 .Build();
 
+        private static MessageComponent BuildRefundAddressButton(
+            string id,
+            AssetInfo asset,
+            bool addressEnabled = true)
+            => new ComponentBuilder()
+                .WithButton(
+                    $"Input refund {asset.Name} ({asset.Ticker}) address",
+                    id,
+                    ButtonStyle.Secondary,
+                    disabled: !addressEnabled)
+                .Build();
+        
         private static MessageComponent BuildSwapButtons(
             string id,
             string stateId,

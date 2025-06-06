@@ -173,14 +173,15 @@ namespace SwappyBot
             }
             
             _logger.LogInformation(
-                "[{StateId}] Announced completed swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress}",
+                "[{StateId}] Announced completed swap from {Amount} {SourceAsset} to {DestinationAmount} {DestinationAsset} at {DestinationAddress} via {DepositAddress}, refund to {RefundAddress}",
                 swapState.StateId,
                 amountFrom,
                 assetFrom.Ticker,
                 amountTo,
                 assetTo.Ticker,
                 swapState.DestinationAddress,
-                swapState.DepositAddress);
+                swapState.DepositAddress,
+                swapState.RefundAddress);
         }
     }
 }

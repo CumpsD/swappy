@@ -16,6 +16,10 @@ Currently the following currencies are supported:
 * Chainflip (FLIP)
 * USDC on Ethereum (USDC)
 * USDT on Ethereum (USDT)
+* Ethereum on Arbitrum (ETH)
+* USDC on Arbitrum (USDC)
+* SOL on Solana (SOL)
+* USDC on Solana (USDC)
   
 Simply type `/swap` on Discord and follow the provided steps.
 

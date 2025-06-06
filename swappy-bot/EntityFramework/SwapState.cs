@@ -15,6 +15,7 @@ namespace SwappyBot.EntityFramework
         public string? AssetTo { get; set;  }
         public decimal? Amount { get; set;  }
         public string? DestinationAddress { get; set; }
+        public string? RefundAddress { get; set; }
         
         public DateTimeOffset? QuoteTime { get; set; }
         
@@ -58,6 +59,7 @@ namespace SwappyBot.EntityFramework
             builder.Property(x => x.AssetTo).IsRequired(false).HasMaxLength(10);
             builder.Property(x => x.Amount).IsRequired(false).HasPrecision(27, 18);
             builder.Property(x => x.DestinationAddress).IsRequired(false).HasMaxLength(100);
+            builder.Property(x => x.RefundAddress).IsRequired(false).HasMaxLength(100);
 
             builder.Property(x => x.QuoteTime).IsRequired(false);
             builder.HasIndex(x => x.QuoteTime);
