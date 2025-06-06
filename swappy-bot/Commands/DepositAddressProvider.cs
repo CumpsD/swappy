@@ -19,7 +19,9 @@ namespace SwappyBot.Commands
             AssetInfo assetTo,
             string destinationAddress,
             string refundAddress,
-            decimal minPrice)
+            decimal minPrice,
+            int? numberOfChunks,
+            int? chunkIntervalBlocks)
         {
             using var client = httpClientFactory.CreateClient("Broker");
 
@@ -35,6 +37,15 @@ namespace SwappyBot.Commands
                 $"&refundAddress={refundAddress}" +
                 $"&retryDurationInBlocks=150" +
                 $"&apiKey={configuration.BrokerApiKey}";
+            
+            if (assetFrom.Id == "btc")
+                swapRequest += "&boostFee=5";
+            
+            if (numberOfChunks is > 0)
+                swapRequest += $"&numberOfChunks={numberOfChunks.Value}";
+            
+            if (chunkIntervalBlocks is > 0)
+                swapRequest += $"&chunkIntervalBlocks={chunkIntervalBlocks.Value}";
             
             var swapResponse = await client.GetAsync(swapRequest);
             

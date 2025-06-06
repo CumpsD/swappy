@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SwappyBot.EntityFramework;
@@ -11,9 +12,11 @@ using SwappyBot.EntityFramework;
 namespace SwappyBot.Migrations
 {
     [DbContext(typeof(BotContext))]
-    partial class BotContextModelSnapshot : ModelSnapshot
+    [Migration("20250606132359_AddQuoteType")]
+    partial class AddQuoteType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,10 +76,6 @@ namespace SwappyBot.Migrations
                         .HasColumnType("numeric(27,18)")
                         .HasColumnName("quotechainflipfee");
 
-                    b.Property<int?>("QuoteChunkInterval")
-                        .HasColumnType("integer")
-                        .HasColumnName("quotechunkinterval");
-
                     b.Property<decimal?>("QuoteDeposit")
                         .HasPrecision(27, 18)
                         .HasColumnType("numeric(27,18)")
@@ -86,10 +85,6 @@ namespace SwappyBot.Migrations
                         .HasPrecision(27, 18)
                         .HasColumnType("numeric(27,18)")
                         .HasColumnName("quoteminprice");
-
-                    b.Property<int?>("QuoteNumberOfChunks")
-                        .HasColumnType("integer")
-                        .HasColumnName("quotenumberofchunks");
 
                     b.Property<decimal?>("QuotePlatformFee")
                         .HasPrecision(27, 18)

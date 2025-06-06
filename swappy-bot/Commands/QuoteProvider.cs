@@ -1,5 +1,6 @@
 namespace SwappyBot.Commands
 {
+    using System.Linq;
     using System.Net.Http;
     using System.Text.Json;
     using System.Text.Json.Serialization;
@@ -21,7 +22,7 @@ namespace SwappyBot.Commands
             using var client = httpClientFactory.CreateClient("Broker");
             
             var quoteRequest =
-                $"quote" +
+                $"quotes" +
                 $"?amount={amount}" +
                 $"&sourceAsset={assetFrom.Id}" +
                 $"&destinationAsset={assetTo.Id}" +
@@ -39,10 +40,19 @@ namespace SwappyBot.Commands
                     body,
                     quoteRequest);
 
-                var quote = JsonSerializer.Deserialize<QuoteResponse>(body);
-                return quote == null
-                    ? Result.Fail("Something has gone wrong while fetching a quote.")
-                    : Result.Ok(quote);
+                var quote = JsonSerializer.Deserialize<QuoteResponse[]>(body);
+                
+                if (quote == null || quote.Length == 0)
+                {
+                    logger.LogError(
+                        "Broker API returned an empty quote for request: {QuoteRequest}",
+                        quoteRequest);
+
+                    return Result.Fail("Something has gone wrong while fetching a quote.");
+                }
+
+                var bestQuote = quote.OrderByDescending(x => x.EgressAmount).First();
+                return Result.Ok(bestQuote);
             }
 
             var error = await quoteResponse.Content.ReadAsStringAsync();
@@ -61,8 +71,12 @@ namespace SwappyBot.Commands
         }
     }
 
+    
     public class QuoteResponse
     {
+        [JsonPropertyName("type")]
+        public string SwapType { get; set; }
+        
         [JsonPropertyName("ingressAmount")]
         public decimal IngressAmount { get; set; }
         
@@ -71,5 +85,11 @@ namespace SwappyBot.Commands
         
         [JsonPropertyName("estimatedPrice")]
         public decimal EstimatedPrice { get; set; }
+        
+        [JsonPropertyName("numberOfChunks")]
+        public int? NumberOfChunks { get; set; }
+        
+        [JsonPropertyName("chunkIntervalBlocks")]
+        public int? ChunkIntervalBlocks { get; set; }
     }
 }

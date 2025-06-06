@@ -25,6 +25,9 @@ namespace SwappyBot.EntityFramework
         public string? QuoteRate { get; set; }
         public decimal? QuotePlatformFee { get; set; }
         public decimal? QuoteChainflipFee { get; set; }
+        public string? QuoteType { get; set; }
+        public int? QuoteNumberOfChunks { get; set; }
+        public int? QuoteChunkInterval { get; set; }
         
         public DateTimeOffset? SwapAccepted { get; set; }
         public DateTimeOffset? SwapCancelled { get; set; }
@@ -71,6 +74,9 @@ namespace SwappyBot.EntityFramework
             builder.Property(x => x.QuoteRate).IsRequired(false).HasMaxLength(200);
             builder.Property(x => x.QuotePlatformFee).IsRequired(false).HasPrecision(27, 18);
             builder.Property(x => x.QuoteChainflipFee).IsRequired(false).HasPrecision(27, 18);
+            builder.Property(x => x.QuoteType).IsRequired(false).HasMaxLength(8);
+            builder.Property(x => x.QuoteNumberOfChunks).IsRequired(false);
+            builder.Property(x => x.QuoteChunkInterval).IsRequired(false);
             
             builder.Property(x => x.SwapAccepted).IsRequired(false);
             builder.HasIndex(x => x.SwapAccepted);

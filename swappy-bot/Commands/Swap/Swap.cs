@@ -401,12 +401,15 @@ namespace SwappyBot.Commands.Swap
             var quoteRate =
                 $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
 
+            swapState.QuoteType = quote.SwapType;
             swapState.QuoteTime = quoteTime;
             swapState.QuoteDeposit = quoteDeposit;
             swapState.QuoteReceive = quoteReceive;
             swapState.QuoteMinPrice = quote.EstimatedPrice;
             swapState.QuoteRate = quoteRate;
-
+            swapState.QuoteNumberOfChunks = quote.NumberOfChunks;
+            swapState.QuoteChunkInterval = quote.ChunkIntervalBlocks;
+            
             await Context.Channel.SendMessageAsync(
                 $"You've chosen to swap **{amountText} {assetFrom.Name} ({assetFrom.Ticker})** to **{assetTo.Name} ({assetTo.Ticker})**.\n" +
                 $"This would result in you receiving about **{quoteReceive} {assetTo.Ticker}** after fees.\n" +
@@ -675,11 +678,14 @@ namespace SwappyBot.Commands.Swap
                 var quoteRate =
                     $"1 {assetFrom.Ticker} ≈ {quoteReceive / quoteDeposit} {assetTo.Ticker} | 1 {assetTo.Ticker} ≈ {quoteDeposit / quoteReceive} {assetFrom.Ticker}";
 
+                swapState.QuoteType = quote.SwapType;
                 swapState.QuoteTime = quoteTime;
                 swapState.QuoteDeposit = quoteDeposit;
                 swapState.QuoteReceive = quoteReceive;
                 swapState.QuoteMinPrice = quote.EstimatedPrice;
                 swapState.QuoteRate = quoteRate;
+                swapState.QuoteNumberOfChunks = quote.NumberOfChunks;
+                swapState.QuoteChunkInterval = quote.ChunkIntervalBlocks;
             }
 
             var swapButtons = BuildSwapButtons(
@@ -797,7 +803,9 @@ namespace SwappyBot.Commands.Swap
                     assetTo,
                     swapState.DestinationAddress,
                     swapState.RefundAddress,
-                    swapStateQuoteMinPrice.Value);
+                    swapStateQuoteMinPrice.Value,
+                    swapState.QuoteNumberOfChunks,
+                    swapState.QuoteChunkInterval);
 
                 if (depositResult.IsFailed)
                     throw new Exception("Failed generating deposit address.");
