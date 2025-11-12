@@ -40,15 +40,6 @@ jobs:
             ${{ env.DOCKER_REGISTRY }}/chainflip/${{ env.PROJECT_NAME }}:latest
             ${{ env.DOCKER_REGISTRY }}/chainflip/${{ env.PROJECT_NAME }}:v${{ env.BUILD_PREFIX }}.${{ github.run_number }}
           
-      - name: Build and Deploy Helm
-        shell: bash
-        env:
-          PACKAGE_VERSION: "v${{ env.BUILD_PREFIX }}.${{ github.run_number }}"
-          PROJECT_NAME: ${{ env.PROJECT_NAME }}
-        run: |
-          helm --kubeconfig chainflip-kubeconfig.yaml package helm --version $PACKAGE_VERSION --app-version $PACKAGE_VERSION
-          helm --kubeconfig chainflip-kubeconfig.yaml upgrade $PROJECT_NAME $PROJECT_NAME-$PACKAGE_VERSION.tgz -i -n bots
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.1.4
