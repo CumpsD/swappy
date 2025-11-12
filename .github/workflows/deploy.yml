@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    
+env:
+  BUILD_PREFIX: "1.0"
+  PROJECT_NAME: swappy
+  DOCKER_REGISTRY: registry.digitalocean.com
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3.6.0
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.DO_USER }}
+          password: ${{ secrets.DO_API }}
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3.11.1
+
+      - name: Build and Push Docker
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            "BUILD_NUMBER=${{ env.BUILD_PREFIX }}.${{ github.run_number }}"
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/chainflip/${{ env.PROJECT_NAME }}:latest
+            ${{ env.DOCKER_REGISTRY }}/chainflip/${{ env.PROJECT_NAME }}:v${{ env.BUILD_PREFIX }}.${{ github.run_number }}
+          
+      - name: Build and Deploy Helm
+        shell: bash
+        env:
+          PACKAGE_VERSION: "v${{ env.BUILD_PREFIX }}.${{ github.run_number }}"
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+        run: |
+          helm --kubeconfig chainflip-kubeconfig.yaml package helm --version $PACKAGE_VERSION --app-version $PACKAGE_VERSION
+          helm --kubeconfig chainflip-kubeconfig.yaml upgrade $PROJECT_NAME $PROJECT_NAME-$PACKAGE_VERSION.tgz -i -n bots
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.BUILD_PREFIX }}.${{ github.run_number }}
+          release_name: v${{ env.BUILD_PREFIX }}.${{ github.run_number }}
+          draft: false
+          prerelease: true
+          body: |
+            ${{ github.event.head_commit.message }}
+          push: false

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: swappy-config
+  labels:
+    app: swappy
+data:
+  SEQ_SERVER: "x"
+  SEQ_API: "x"
+  DEBUG_USER: "x"
+  BROKER_URL: "x"
+  PREFIX: "x"
+  QUOTE_VALIDITY_IN_SECONDS: "x"
+  STATUS_CHECK_IN_SECONDS: "x"
+  CHANNEL_0: "x"
+  CHANNEL_1: "x"
+  COMPLETED_SWAP_URL: "x"
+  DEPOSIT_CHANNEL_URL: "x"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: swappy-secret
+  labels:
+    app: swappy
+type: Opaque
+stringData:
+  CONNECTION_STRING: "x"
+  SEQ_API_KEY: "x"
+  DISCORD_TOKEN: "x"
+  BROKER_API_KEY: "x"

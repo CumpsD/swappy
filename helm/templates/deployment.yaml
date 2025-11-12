@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}"
+  labels:
+    app: "{{ .Chart.Name }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ .Chart.Name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Chart.Name }}"
+    spec:
+      nodeSelector:
+        doks.digitalocean.com/node-pool: chainflip-bots
+
+      restartPolicy: Always
+
+      containers:
+        - name: "{{ .Chart.Name }}"
+          image: "{{ .Values.image }}:{{ .Chart.Version }}"
+          imagePullPolicy: Always
+          env:
+            - name: DOTNET_PRINT_TELEMETRY_MESSAGE
+              value: "false"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: Serilog__MinimumLevel__Override__SwappyBot
+              value: "Information"
+            - name: ConnectionStrings__Bot
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}-secret
+                  key: CONNECTION_STRING
+            - name: Bot__Token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}-secret
+                  key: DISCORD_TOKEN
+            - name: Bot__Prefix
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: PREFIX
+            - name: Bot__DebugUser
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: DEBUG_USER
+            - name: Bot__BrokerApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}-secret
+                  key: BROKER_API_KEY
+            - name: Bot__BrokerUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: BROKER_URL
+            - name: Bot__QuoteValidityInSeconds
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: QUOTE_VALIDITY_IN_SECONDS
+            - name: Bot__StatusCheckIntervalInSeconds
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: STATUS_CHECK_IN_SECONDS
+            - name: Bot__NotificationChannelIds__0
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: CHANNEL_0
+            - name: Bot__NotificationChannelIds__1
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: CHANNEL_1
+            - name: Bot__CompletedSwapUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: COMPLETED_SWAP_URL
+            - name: Bot__DepositChannelUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: DEPOSIT_CHANNEL_URL
+            - name: Serilog__WriteTo__1__Name
+              value: "Seq"
+            - name: Serilog__WriteTo__1__Args__ServerUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: SEQ_SERVER
+            - name: Serilog__WriteTo__1__Args__ApiUrl
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-config
+                  key: SEQ_API
+            - name: Serilog__WriteTo__1__Args__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}-secret
+                  key: SEQ_API_KEY
