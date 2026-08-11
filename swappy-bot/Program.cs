@@ -129,11 +129,7 @@
                 {
                     GatewayIntents = 
                         GatewayIntents.Guilds |
-                        GatewayIntents.GuildMembers |
-                        GatewayIntents.GuildMessages |
-                        GatewayIntents.GuildMessageReactions |
-                        GatewayIntents.GuildMessageTyping |
-                        GatewayIntents.MessageContent,
+                        GatewayIntents.GuildMembers,
                     LogGatewayIntentWarnings = true,
                     AlwaysDownloadUsers = true,
                     LogLevel = LogSeverity.Debug
